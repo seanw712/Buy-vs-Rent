@@ -8595,6 +8595,125 @@ In the html, move the total rent paid & total interest to a separate section bel
 
 ---
 
+_**Assistant**_
+
+I'll update the table structure in script.js to separate the net worth calculation components from the additional context information.
+
+---
+
+_**Assistant**_
+
+```
+function updateResultsTable(results) {
+    const tableHtml = `
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Rent + Invest</th>
+                    <th>Max Mortgage</th>
+                    <th>Min Mortgage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Initial Investment Growth</td>
+                    <td>${formatCurrency(results.rent.principal_investment_value)}</td>
+                    <td>${formatCurrency(results.max_mortgage.principal_investment_value)}</td>
+                    <td>${formatCurrency(results.min_mortgage.principal_investment_value)}</td>
+                </tr>
+                <tr>
+                    <td>Monthly Savings Growth</td>
+                    <td>${formatCurrency(results.rent.monthly_investment_value)}</td>
+                    <td>${formatCurrency(results.max_mortgage.monthly_investment_value)}</td>
+                    <td>${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
+                </tr>
+                <tr>
+                    <td>House Value</td>
+                    <td>-</td>
+                    <td>${formatCurrency(results.max_mortgage.house_value)}</td>
+                    <td>${formatCurrency(results.min_mortgage.house_value)}</td>
+                </tr>
+                <tr>
+                    <td>Remaining Mortgage</td>
+                    <td>-</td>
+                    <td>${formatCurrency(-results.max_mortgage.remaining_mortgage)}</td>
+                    <td>${formatCurrency(-results.min_mortgage.remaining_mortgage)}</td>
+                </tr>
+                <tr class="table-primary">
+                    <th>Net Worth</th>
+                    <td>${formatCurrency(results.rent.net_worth)}</td>
+                    <td>${formatCurrency(results.max_mortgage.net_worth)}</td>
+                    <td>${formatCurrency(results.min_mortgage.net_worth)}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h4 class="mt-4">Additional Information</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Rent + Invest</th>
+                    <th>Max Mortgage</th>
+                    <th>Min Mortgage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Interest Paid</td>
+                    <td>-</td>
+                    <td>${formatCurrency(results.max_mortgage.total_interest_paid)}</td>
+                    <td>${formatCurrency(results.min_mortgage.total_interest_paid)}</td>
+                </tr>
+                <tr>
+                    <td>Total Rent Paid</td>
+                    <td>${formatCurrency(results.rent.total_rent_paid)}</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've reorganized the table into two sections:
+
+1. Main table showing net worth calculation components:
+   - Initial Investment Growth
+   - Monthly Savings Growth
+   - House Value
+   - Remaining Mortgage
+   - Net Worth (highlighted row at bottom)
+
+2. Separate table below with additional context:
+   - Total Interest Paid
+   - Total Rent Paid
+
+This makes it clearer which values contribute to the net worth calculation and which are provided for additional context. The separation is marked with a heading "Additional Information" between the tables.
+
+Let me know if you'd like any adjustments to this layout!
+
+---
+
+_**User**_
+
+Now I want an extra row under extra information that shows the average monthly housing cost. For the rent scenario this will be the total rent paid divided by the amount of calculation years multiplied by 12 months, fo the other two scenario's it will be the respective max & min monthly mortgage variable.
+
+---
+
+_**Assistant**_
+
+
+
+---
+
 
 
 ---
