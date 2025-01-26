@@ -151,12 +151,6 @@ function updateResultsTable(results) {
                     <td>${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
                 </tr>
                 <tr>
-                    <td>Total Investment Value</td>
-                    <td>${formatCurrency(results.rent.final_investment_value)}</td>
-                    <td>${formatCurrency(results.max_mortgage.final_investment_value)}</td>
-                    <td>${formatCurrency(results.min_mortgage.final_investment_value)}</td>
-                </tr>
-                <tr>
                     <td>House Value</td>
                     <td>-</td>
                     <td>${formatCurrency(results.max_mortgage.house_value)}</td>

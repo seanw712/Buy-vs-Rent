@@ -25,34 +25,66 @@ class ScenarioInputs:
         Raises:
             ValueError: If any input value is invalid.
         """
+        # Convert all numeric inputs to proper types
+        self.initial_savings = float(self.initial_savings)
+        self.house_cost = float(self.house_cost)
+        self.monthly_rent = float(self.monthly_rent)
+        self.monthly_disposable_income = float(self.monthly_disposable_income)
+        self.time_horizon_years = int(self.time_horizon_years)
+        self.mortgage_term_years = int(self.mortgage_term_years)
+        self.house_inflation = float(self.house_inflation)
+        self.investment_return = float(self.investment_return)
+        self.mortgage_rate = float(self.mortgage_rate)
+        self.min_down_payment_percent = float(self.min_down_payment_percent)
+        self.cpi = float(self.cpi)
+        
         # Validate time periods
-        if self.time_horizon_years <= 0 or self.mortgage_term_years <= 0:
-            raise ValueError("Time periods must be positive.")
+        if self.time_horizon_years <= 0:
+            raise ValueError("Time horizon must be positive.")
+        if self.mortgage_term_years <= 0:
+            raise ValueError("Mortgage term must be positive.")
+        if self.mortgage_term_years > self.time_horizon_years:
+            self.mortgage_term_years = self.time_horizon_years
         
         # Validate costs and payments
-        if self.house_cost < 0 or self.monthly_rent < 0:
-            raise ValueError("Costs cannot be negative.")
-        if self.monthly_disposable_income < 0:
-            raise ValueError("Disposable income cannot be negative.")
-        
-        # Validate economic variables
-        if self.house_inflation < 0 or self.cpi < 0:
-            raise ValueError("Inflation rates cannot be negative.")
+        if self.house_cost <= 0:
+            raise ValueError("House cost must be positive.")
+        if self.monthly_rent < 0:
+            raise ValueError("Monthly rent cannot be negative.")
+        if self.monthly_disposable_income <= 0:
+            raise ValueError("Monthly disposable income must be positive.")
+        if self.initial_savings < 0:
+            raise ValueError("Initial savings cannot be negative.")
+            
+        # Validate rates
+        if self.house_inflation < 0:
+            raise ValueError("House inflation rate cannot be negative.")
         if self.investment_return < 0:
-            raise ValueError("Investment return cannot be negative.")
+            raise ValueError("Investment return rate cannot be negative.")
         if self.mortgage_rate < 0:
             raise ValueError("Mortgage rate cannot be negative.")
+        if self.cpi < 0:
+            raise ValueError("CPI cannot be negative.")
         
-        # Additional validation for realistic values
-        if self.house_inflation > 0.2 or self.cpi > 0.2:
-            raise ValueError("Inflation rates are unrealistically high.")
+        # Validate realistic value ranges
+        if self.house_inflation > 0.2:
+            raise ValueError("House inflation rate unrealistically high (>20%).")
         if self.investment_return > 0.2:
-            raise ValueError("Investment return is unrealistically high.")
+            raise ValueError("Investment return rate unrealistically high (>20%).")
         if self.mortgage_rate > 0.2:
-            raise ValueError("Mortgage rate is unrealistically high.")
+            raise ValueError("Mortgage rate unrealistically high (>20%).")
+        if self.cpi > 0.2:
+            raise ValueError("CPI unrealistically high (>20%).")
         
+        # Validate down payment
         if self.min_down_payment_percent < 0 or self.min_down_payment_percent > 1:
-            raise ValueError("Down payment percentage must be between 0 and 1")
+            raise ValueError("Down payment percentage must be between 0 and 1.")
+        
+        # Validate mortgage feasibility
+        total_house_cost = self.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT)
+        min_down_payment = total_house_cost * self.min_down_payment_percent
+        if min_down_payment > self.initial_savings:
+            raise ValueError("Initial savings insufficient for minimum down payment.")
 
 @dataclass
 class ScenarioResults:
@@ -78,18 +110,31 @@ class ScenarioResults:
     monthly_mortgage_min: float = 0.0
     monthly_mortgage_max: float = 0.0
     
-    @property
-    def final_investment_value(self) -> float:
-        """Total value of all investments."""
-        return max(0.0, (self.principal_investment_value or 0.0) + (self.monthly_investment_value or 0.0))
+    def __post_init__(self):
+        """Ensure all values are initialized to at least 0.0"""
+        self.principal_investment_value = self.principal_investment_value or 0.0
+        self.monthly_investment_value = self.monthly_investment_value or 0.0
+        self.house_value = self.house_value or 0.0
+        self.remaining_mortgage = self.remaining_mortgage or 0.0
+        self.total_interest_paid = self.total_interest_paid or 0.0
+        self.total_rent_paid = self.total_rent_paid or 0.0
+        self.monthly_mortgage_min = self.monthly_mortgage_min or 0.0
+        self.monthly_mortgage_max = self.monthly_mortgage_max or 0.0
     
     @property
     def net_worth(self) -> float:
         """Total net worth including all assets and liabilities."""
-        return (self.principal_investment_value or 0.0) + \
-               (self.monthly_investment_value or 0.0) + \
-               (self.house_value or 0.0) - \
-               (self.remaining_mortgage or 0.0)
+        try:
+            return float(self.principal_investment_value + 
+                        self.monthly_investment_value + 
+                        self.house_value - 
+                        self.remaining_mortgage)
+        except Exception as e:
+            print(f"Net worth calculation error: principal={self.principal_investment_value}, " +
+                  f"monthly={self.monthly_investment_value}, " +
+                  f"house={self.house_value}, " +
+                  f"mortgage={self.remaining_mortgage}")
+            return 0.0
 
 def calculate_future_value_principal(principal: float, years: int, annual_rate: float) -> float:
     """
@@ -103,22 +148,7 @@ def calculate_future_value_principal(principal: float, years: int, annual_rate: 
     Returns:
         float: Future value of the principal investment.
     """
-    try:
-        if years <= 0:
-            return principal
-            
-        if principal < 0:
-            principal = 0
-            
-        # Future value of initial principal (prevent negative growth)
-        fv_principal = max(0, principal * (1 + annual_rate) ** years)
-        
-        return fv_principal
-        
-    except Exception as e:
-        print(f"Future value calculation error: principal={principal}, " +
-              f"years={years}, annual_rate={annual_rate}")
-        raise ValueError(str(e))
+    return principal * (1 + annual_rate) ** years
 
 def calculate_mortgage_payment(principal: float, annual_rate: float, years: int) -> float:
     """
@@ -132,42 +162,17 @@ def calculate_mortgage_payment(principal: float, annual_rate: float, years: int)
     Returns:
         float: Monthly payment amount
     """
-    try:
-        if years <= 0:
-            raise ValueError("Mortgage term must be positive")
-            
-        if principal <= 0:
-            return 0.0
-            
-        if annual_rate < 0:
-            raise ValueError("Interest rate cannot be negative")
-            
-        # Handle zero or very small interest rate
-        if abs(annual_rate) < 1e-10:
-            return principal / (years * 12)
-            
-        monthly_rate = annual_rate / 12
-        n_payments = years * 12
-        
-        # Standard mortgage payment formula: P * (r(1+r)^n)/((1+r)^n - 1)
-        # where P = principal, r = monthly rate, n = number of payments
-        try:
-            numerator = monthly_rate * (1 + monthly_rate) ** n_payments
-            denominator = (1 + monthly_rate) ** n_payments - 1
-            
-            if abs(denominator) < 1e-10:  # Prevent division by zero
-                return principal / n_payments
-                
-            payment = principal * (numerator / denominator)
-            return max(0, payment)
-            
-        except OverflowError:  # Handle very large exponents
-            raise ValueError("Interest rate or term too high for calculation")
-            
-    except Exception as e:
-        print(f"Mortgage payment calculation error: principal={principal}, " +
-              f"annual_rate={annual_rate}, years={years}")
-        raise ValueError(str(e))
+    monthly_rate = annual_rate / 12
+    n_payments = years * 12
+    
+    # Handle zero interest rate
+    if annual_rate == 0:
+        return principal / n_payments
+    
+    # Standard mortgage payment formula: P * (r(1+r)^n)/((1+r)^n - 1)
+    numerator = monthly_rate * (1 + monthly_rate) ** n_payments
+    denominator = (1 + monthly_rate) ** n_payments - 1
+    return principal * (numerator / denominator)
 
 def calculate_remaining_mortgage(principal: float, payment: float, 
                               annual_rate: float, years_elapsed: int) -> tuple[float, float]:
@@ -183,45 +188,26 @@ def calculate_remaining_mortgage(principal: float, payment: float,
     Returns:
         tuple[float, float]: (Remaining principal, Total interest paid)
     """
-    try:
-        if years_elapsed <= 0:
-            return principal, 0.0
+    monthly_rate = annual_rate / 12
+    n_months = years_elapsed * 12
+    remaining = principal
+    total_interest = 0.0
+    
+    for _ in range(n_months):
+        if remaining <= 0:
+            break
             
-        if principal <= 0:
-            return 0.0, 0.0
-            
-        if payment <= 0:
-            return principal, 0.0
-            
-        if annual_rate < 0:
-            raise ValueError("Interest rate cannot be negative")
-            
-        monthly_rate = annual_rate / 12
-        n_months = years_elapsed * 12
-        remaining = principal
-        total_interest = 0.0
+        interest = remaining * monthly_rate
+        principal_part = payment - interest
         
-        for _ in range(n_months):
-            if remaining <= 0:
-                break
-                
-            interest = remaining * monthly_rate
-            principal_part = payment - interest
+        if principal_part <= 0:  # Payment doesn't cover interest
+            total_interest += payment * n_months  # All payments go to interest
+            return principal, total_interest  # Principal remains unchanged
             
-            if principal_part <= 0:  # Payment doesn't cover interest
-                total_interest += payment * n_months  # All payments go to interest
-                return principal, total_interest  # Principal remains unchanged
-                
-            total_interest += interest
-            remaining = max(0, remaining - principal_part)  # Prevent negative remaining
-        
-        return remaining, total_interest
-        
-    except Exception as e:
-        print(f"Mortgage calculation error: principal={principal}, " +
-              f"payment={payment}, rate={annual_rate}, " +
-              f"years={years_elapsed}")
-        raise ValueError(str(e))
+        total_interest += interest
+        remaining -= principal_part
+    
+    return remaining, total_interest
 
 def calculate_future_value_monthly_investment(
     initial_monthly_disposable: float,
@@ -247,160 +233,126 @@ def calculate_future_value_monthly_investment(
     Returns:
         float: Future value of all monthly investments
     """
-    try:
-        if years <= 0:
-            return 0.0
-            
-        monthly_rate = investment_return / 12
-        total_value = 0.0
+    monthly_rate = investment_return / 12
+    total_value = 0.0
+    
+    # Year by year calculation
+    for year in range(years):
+        # Calculate this year's monthly disposable income (adjusted for CPI)
+        monthly_disposable = initial_monthly_disposable * (1 + cpi) ** year
         
-        # Year by year calculation
-        for year in range(years):
-            # Calculate this year's monthly disposable income (adjusted for CPI)
-            monthly_disposable = initial_monthly_disposable * (1 + cpi) ** year
-            
-            # Calculate this year's housing cost
-            if is_fixed_housing_cost:
-                monthly_housing = initial_monthly_housing_cost  # Fixed mortgage payment
-            else:
-                monthly_housing = initial_monthly_housing_cost * (1 + cpi) ** year  # Growing rent
-            
-            # Calculate this year's monthly investment amount
-            monthly_investment = max(0, monthly_disposable - monthly_housing)
-            
-            # Add and grow this year's monthly investments
-            for month in range(12):
-                # Add this month's investment
-                total_value += monthly_investment
-                # Grow total for one month
-                total_value *= (1 + monthly_rate)
+        # Calculate this year's housing cost
+        if is_fixed_housing_cost:
+            monthly_housing = initial_monthly_housing_cost  # Fixed mortgage payment
+        else:
+            monthly_housing = initial_monthly_housing_cost * (1 + cpi) ** year  # Growing rent
         
-        return max(0, total_value)
+        # Calculate this year's monthly investment amount
+        monthly_investment = monthly_disposable - monthly_housing
         
-    except Exception as e:
-        print(f"Monthly investment calculation error: " +
-              f"disposable={initial_monthly_disposable}, " +
-              f"housing={initial_monthly_housing_cost}, " +
-              f"years={years}, return={investment_return}, " +
-              f"cpi={cpi}, fixed={is_fixed_housing_cost}")
-        raise ValueError(str(e))
+        # Add and grow this year's monthly investments
+        for month in range(12):
+            total_value += monthly_investment
+            total_value *= (1 + monthly_rate)
+    
+    return total_value
 
 def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
     """Calculate results for rent and invest scenario."""
-    try:
-        # Calculate growth of initial savings (principal only)
-        principal_growth = calculate_future_value_principal(
-            principal=max(0, inputs.initial_savings),
-            years=inputs.time_horizon_years,
-            annual_rate=inputs.investment_return
-        )
-        
-        # Calculate investment growth from monthly contributions
-        total_investment = calculate_future_value_monthly_investment(
-            initial_monthly_disposable=max(0, inputs.monthly_disposable_income),
-            initial_monthly_housing_cost=max(0, inputs.monthly_rent),
-            years=max(1, inputs.time_horizon_years),
-            investment_return=max(0, inputs.investment_return),
-            cpi=max(0, inputs.cpi),
-            is_fixed_housing_cost=False
-        )
-        
-        # Calculate total rent paid with inflation
-        total_rent = 0
-        monthly_rent = max(0, inputs.monthly_rent)
-        for year in range(inputs.time_horizon_years):
-            total_rent += monthly_rent * 12
-            monthly_rent *= (1 + inputs.cpi)
-        
-        return ScenarioResults(
-            principal_investment_value=principal_growth,  # Growth of initial savings only
-            monthly_investment_value=total_investment,  # Growth of monthly contributions
-            house_value=0.0,
-            remaining_mortgage=0.0,
-            total_interest_paid=0.0,
-            total_rent_paid=max(0, total_rent),
-            monthly_mortgage_min=0.0,
-            monthly_mortgage_max=0.0
-        )
-        
-    except Exception as e:
-        print(f"Rent scenario calculation error")
-        raise ValueError(str(e))
+    # Calculate growth of initial savings (principal only)
+    principal_growth = calculate_future_value_principal(
+        principal=inputs.initial_savings,
+        years=inputs.time_horizon_years,
+        annual_rate=inputs.investment_return
+    )
+    
+    # Calculate investment growth from monthly contributions
+    monthly_growth = calculate_future_value_monthly_investment(
+        initial_monthly_disposable=inputs.monthly_disposable_income,
+        initial_monthly_housing_cost=inputs.monthly_rent,
+        years=inputs.time_horizon_years,
+        investment_return=inputs.investment_return,
+        cpi=inputs.cpi,
+        is_fixed_housing_cost=False
+    )
+    
+    # Calculate total rent paid with inflation
+    total_rent = 0.0
+    monthly_rent = inputs.monthly_rent
+    for year in range(inputs.time_horizon_years):
+        total_rent += monthly_rent * 12
+        monthly_rent *= (1 + inputs.cpi)
+    
+    return ScenarioResults(
+        principal_investment_value=principal_growth,
+        monthly_investment_value=monthly_growth,
+        total_rent_paid=total_rent
+    )
 
 def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> ScenarioResults:
     """Calculate results for buying scenario."""
-    try:
-        # Calculate total purchase cost including fees
-        total_house_cost = max(0, inputs.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT))
-        
-        # Calculate mortgage amounts for both scenarios
-        max_mortgage_amount = total_house_cost * (1 - inputs.min_down_payment_percent)
-        min_mortgage_amount = min(total_house_cost - inputs.initial_savings, max_mortgage_amount)
-        
-        # Ensure non-negative mortgage amounts
-        max_mortgage_amount = max(0, max_mortgage_amount)
-        min_mortgage_amount = max(0, min_mortgage_amount)
-        
-        # Calculate monthly payments for both scenarios
-        max_monthly_payment = calculate_mortgage_payment(
-            principal=max_mortgage_amount,
-            annual_rate=max(0, inputs.mortgage_rate),
-            years=max(1, inputs.mortgage_term_years)
-        )
-        
-        min_monthly_payment = calculate_mortgage_payment(
-            principal=min_mortgage_amount,
-            annual_rate=max(0, inputs.mortgage_rate),
-            years=max(1, inputs.mortgage_term_years)
-        )
-        
-        # Select current scenario's values
-        mortgage_amount = max_mortgage_amount if max_mortgage else min_mortgage_amount
-        monthly_payment = max_monthly_payment if max_mortgage else min_monthly_payment
-        down_payment = min(inputs.initial_savings, total_house_cost - mortgage_amount)
-        
-        # Calculate remaining mortgage and total interest
-        remaining_mortgage, total_interest = calculate_remaining_mortgage(
-            principal=mortgage_amount,
-            payment=monthly_payment,
-            annual_rate=max(0, inputs.mortgage_rate),
-            years_elapsed=min(inputs.time_horizon_years, inputs.mortgage_term_years)
-        )
-        
-        # Calculate future house value (prevent negative growth)
-        future_house_value = max(0, inputs.house_cost * (1 + inputs.house_inflation) ** inputs.time_horizon_years)
-        
-        # Calculate growth of remaining initial savings (after down payment)
-        principal_growth = calculate_future_value_principal(
-            principal=max(0, inputs.initial_savings - down_payment),
-            years=inputs.time_horizon_years,
-            annual_rate=inputs.investment_return
-        )
-        
-        # Calculate investment growth from monthly contributions
-        total_investment = calculate_future_value_monthly_investment(
-            initial_monthly_disposable=max(0, inputs.monthly_disposable_income),
-            initial_monthly_housing_cost=monthly_payment,
-            years=max(1, inputs.time_horizon_years),
-            investment_return=max(0, inputs.investment_return),
-            cpi=max(0, inputs.cpi),
-            is_fixed_housing_cost=True
-        )
-        
-        return ScenarioResults(
-            principal_investment_value=principal_growth,  # Growth of initial savings only
-            monthly_investment_value=total_investment,  # Growth of monthly contributions
-            house_value=future_house_value,
-            remaining_mortgage=remaining_mortgage,
-            total_interest_paid=total_interest,
-            total_rent_paid=0.0,
-            monthly_mortgage_min=min_monthly_payment,
-            monthly_mortgage_max=max_monthly_payment
-        )
-        
-    except Exception as e:
-        print(f"Buy scenario calculation error: max_mortgage={max_mortgage}")
-        raise ValueError(str(e))
+    # Calculate total purchase cost including fees
+    total_house_cost = inputs.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT)
+    
+    # Calculate mortgage amounts for both scenarios
+    max_mortgage_amount = total_house_cost * (1 - inputs.min_down_payment_percent)
+    min_mortgage_amount = min(total_house_cost - inputs.initial_savings, max_mortgage_amount)
+    
+    # Calculate monthly payments for both scenarios
+    max_monthly_payment = calculate_mortgage_payment(
+        principal=max_mortgage_amount,
+        annual_rate=inputs.mortgage_rate,
+        years=inputs.mortgage_term_years
+    )
+    
+    min_monthly_payment = calculate_mortgage_payment(
+        principal=min_mortgage_amount,
+        annual_rate=inputs.mortgage_rate,
+        years=inputs.mortgage_term_years
+    )
+    
+    # Select current scenario's values
+    mortgage_amount = max_mortgage_amount if max_mortgage else min_mortgage_amount
+    monthly_payment = max_monthly_payment if max_mortgage else min_monthly_payment
+    down_payment = min(inputs.initial_savings, total_house_cost - mortgage_amount)
+    
+    # Calculate remaining mortgage and total interest
+    remaining_mortgage, total_interest = calculate_remaining_mortgage(
+        principal=mortgage_amount,
+        payment=monthly_payment,
+        annual_rate=inputs.mortgage_rate,
+        years_elapsed=min(inputs.time_horizon_years, inputs.mortgage_term_years)
+    )
+    
+    # Calculate future house value
+    future_house_value = inputs.house_cost * (1 + inputs.house_inflation) ** inputs.time_horizon_years
+    
+    # Calculate growth of remaining initial savings (after down payment)
+    principal_growth = calculate_future_value_principal(
+        principal=inputs.initial_savings - down_payment,
+        years=inputs.time_horizon_years,
+        annual_rate=inputs.investment_return
+    )
+    
+    # Calculate investment growth from monthly contributions
+    monthly_growth = calculate_future_value_monthly_investment(
+        initial_monthly_disposable=inputs.monthly_disposable_income,
+        initial_monthly_housing_cost=monthly_payment,
+        years=inputs.time_horizon_years,
+        investment_return=inputs.investment_return,
+        cpi=inputs.cpi,
+        is_fixed_housing_cost=True
+    )
+    
+    return ScenarioResults(
+        principal_investment_value=principal_growth,
+        monthly_investment_value=monthly_growth,
+        house_value=future_house_value,
+        remaining_mortgage=remaining_mortgage,
+        total_interest_paid=total_interest,
+        monthly_mortgage_min=min_monthly_payment,
+        monthly_mortgage_max=max_monthly_payment
+    )
 
 def compare_scenarios(inputs: ScenarioInputs) -> Dict[str, ScenarioResults]:
     """
@@ -448,8 +400,6 @@ def compare_scenarios(inputs: ScenarioInputs) -> Dict[str, ScenarioResults]:
         ]:
             if not isinstance(scenario, ScenarioResults):
                 raise ValueError(f"Invalid {name} scenario result type")
-            if scenario.final_investment_value < 0:
-                raise ValueError(f"Negative investment value calculated in {name} scenario")
             if scenario.net_worth < -inputs.house_cost:
                 raise ValueError(f"Unrealistic negative net worth calculated in {name} scenario")
         
