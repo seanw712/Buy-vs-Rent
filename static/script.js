@@ -206,15 +206,14 @@ document.getElementById('calculatorForm').addEventListener('submit', async funct
         initial_savings: parseFloat(document.getElementById('initial_savings').value),
         house_cost: parseFloat(document.getElementById('house_cost').value),
         monthly_rent: parseFloat(document.getElementById('monthly_rent').value),
-        monthly_mortgage_max: parseFloat(document.getElementById('monthly_mortgage_max').value),
-        monthly_mortgage_min: parseFloat(document.getElementById('monthly_mortgage_min').value),
         monthly_disposable: parseFloat(document.getElementById('monthly_disposable').value),
         time_horizon: parseInt(document.getElementById('time_horizon').value),
         mortgage_term: parseInt(document.getElementById('mortgage_term').value),
         rent_inflation: parseFloat(document.getElementById('rent_inflation').value) / 100,
         house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,
         investment_return: parseFloat(document.getElementById('investment_return').value) / 100,
-        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100
+        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,
+        min_down_payment_percent: parseFloat(document.getElementById('min_down_payment').value) / 100
     };
     
     try {
@@ -245,4 +244,8 @@ document.getElementById('calculatorForm').addEventListener('submit', async funct
         // Hide loading spinner
         document.getElementById('loadingSpinner').style.display = 'none';
     }
-}); 
+});
+
+function displayResults(results) {
+    // ... existing display logic without monthly cost displays ...
+} 

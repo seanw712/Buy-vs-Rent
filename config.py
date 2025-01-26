@@ -18,6 +18,7 @@ DEFAULT_MONTHLY_MORTGAGE_MIN = 1221  # €1,221 monthly mortgage (min mortgage s
 DEFAULT_MONTHLY_DISPOSABLE = 2000  # €2,000 monthly disposable income
 DEFAULT_TIME_HORIZON_YEARS = 32  # 32 years time horizon
 DEFAULT_MORTGAGE_TERM_YEARS = 25  # 25 years mortgage term
+DEFAULT_MIN_DOWN_PAYMENT_PERCENT = 0.10  # 10% minimum down payment
 
 # Mortgage Constants
 MIN_DOWN_PAYMENT_PERCENT = 0.10  # 10% minimum down payment

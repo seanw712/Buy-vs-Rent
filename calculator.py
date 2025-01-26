@@ -12,8 +12,6 @@ class ScenarioInputs:
         initial_savings (float): Initial savings available for investment or down payment.
         house_cost (float): Total cost of the house.
         monthly_rent (float): Monthly rent payment.
-        monthly_mortgage_max (float): Maximum monthly mortgage payment.
-        monthly_mortgage_min (float): Minimum monthly mortgage payment.
         time_horizon_years (int): Time horizon for the scenario in years.
         mortgage_term_years (int): Term of the mortgage in years.
         monthly_disposable_income (float): Monthly disposable income after expenses.
@@ -22,12 +20,11 @@ class ScenarioInputs:
         cpi (float): Consumer Price Index inflation rate (default: cfg.DEFAULT_CPI).
         investment_return (float): Annual return on investments (default: cfg.DEFAULT_INVESTMENT_RETURN).
         mortgage_rate (float): Annual mortgage interest rate (default: cfg.DEFAULT_MORTGAGE_RATE).
+        min_down_payment_percent (float): Minimum down payment percentage (default: cfg.DEFAULT_MIN_DOWN_PAYMENT_PERCENT).
     """
     initial_savings: float
     house_cost: float
     monthly_rent: float
-    monthly_mortgage_max: float
-    monthly_mortgage_min: float
     time_horizon_years: int
     mortgage_term_years: int
     monthly_disposable_income: float
@@ -38,6 +35,7 @@ class ScenarioInputs:
     cpi: float = cfg.DEFAULT_CPI
     investment_return: float = cfg.DEFAULT_INVESTMENT_RETURN
     mortgage_rate: float = cfg.DEFAULT_MORTGAGE_RATE
+    min_down_payment_percent: float = cfg.DEFAULT_MIN_DOWN_PAYMENT_PERCENT
 
     def validate(self):
         """
@@ -49,14 +47,10 @@ class ScenarioInputs:
         # Validate time periods
         if self.time_horizon_years <= 0 or self.mortgage_term_years <= 0:
             raise ValueError("Time periods must be positive.")
-        if self.mortgage_term_years > self.time_horizon_years:
-            raise ValueError("Mortgage term cannot exceed the time horizon.")
         
         # Validate costs and payments
         if self.house_cost < 0 or self.monthly_rent < 0:
             raise ValueError("Costs cannot be negative.")
-        if self.monthly_mortgage_max < 0 or self.monthly_mortgage_min < 0:
-            raise ValueError("Mortgage payments cannot be negative.")
         if self.monthly_disposable_income < 0:
             raise ValueError("Disposable income cannot be negative.")
         
@@ -75,6 +69,9 @@ class ScenarioInputs:
             raise ValueError("Investment return is unrealistically high.")
         if self.mortgage_rate > 0.2:
             raise ValueError("Mortgage rate is unrealistically high.")
+        
+        if self.min_down_payment_percent < 0 or self.min_down_payment_percent > 1:
+            raise ValueError("Down payment percentage must be between 0 and 1")
 
 @dataclass
 class ScenarioResults:
@@ -233,39 +230,41 @@ def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
         total_rent_paid=total_rent
     )
 
-def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage: bool) -> ScenarioResults:
-    """
-    Calculate results for a house buying scenario.
+def calculate_buy_scenario(inputs, max_mortgage=True):
+    # Calculate total purchase cost including fees
+    total_house_cost = inputs.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT)
     
-    Args:
-        inputs (ScenarioInputs): Calculation input parameters.
-        max_mortgage (bool): If True, use maximum mortgage scenario.
+    # Calculate maximum allowed mortgage based on minimum down payment rule
+    max_total_mortgage_amount = total_house_cost * (1 - inputs.min_down_payment_percent)
     
-    Returns:
-        ScenarioResults: Calculated scenario results.
-    """
-    # Calculate down payment and costs
-    down_payment_percent = cfg.MIN_DOWN_PAYMENT_PERCENT if max_mortgage else cfg.MAX_DOWN_PAYMENT_PERCENT
-    down_payment = inputs.house_cost * down_payment_percent
-    purchase_costs = inputs.house_cost * cfg.HOUSE_PURCHASE_FEES_PERCENT
+    if not max_mortgage:
+        # For min mortgage scenario, take the smaller of:
+        # 1. What you need after using all savings
+        # 2. Maximum allowed mortgage
+        max_total_mortgage_amount = min(total_house_cost - inputs.initial_savings, max_total_mortgage_amount)
     
-    # Calculate mortgage details
-    mortgage_principal = inputs.house_cost - down_payment
-    monthly_payment = inputs.monthly_mortgage_max if max_mortgage else inputs.monthly_mortgage_min
-    
-    # Calculate remaining mortgage and interest
-    remaining_mortgage, total_interest = calculate_remaining_mortgage(
-        mortgage_principal,
-        monthly_payment,
-        inputs.mortgage_rate,
-        min(inputs.time_horizon_years, inputs.mortgage_term_years)
+    down_payment = total_house_cost - max_total_mortgage_amount
+
+    # Calculate monthly mortgage payment using the amortization formula
+    monthly_payment = calculate_mortgage_payment(
+        principal=max_total_mortgage_amount,
+        annual_rate=inputs.mortgage_rate,
+        years=inputs.mortgage_term_years
     )
-    
+
+    # Calculate remaining mortgage and total interest paid
+    remaining_mortgage, total_interest = calculate_remaining_mortgage(
+        principal=max_total_mortgage_amount,
+        payment=monthly_payment,
+        annual_rate=inputs.mortgage_rate,
+        years_elapsed=min(inputs.time_horizon_years, inputs.mortgage_term_years)
+    )
+
     # Calculate future house value
     future_house_value = inputs.house_cost * (1 + inputs.house_inflation) ** inputs.time_horizon_years
     
     # Calculate investment of remaining money
-    initial_investment = max(0, inputs.initial_savings - down_payment - purchase_costs)
+    initial_investment = max(0, inputs.initial_savings - down_payment)
     monthly_investment = max(0, inputs.monthly_disposable_income - monthly_payment)
     
     principal_investment = calculate_future_value(

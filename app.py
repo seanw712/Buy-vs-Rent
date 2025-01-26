@@ -24,15 +24,14 @@ def calculate():
             initial_savings=float(data['initial_savings']),
             house_cost=float(data['house_cost']),
             monthly_rent=float(data['monthly_rent']),
-            monthly_mortgage_max=float(data['monthly_mortgage_max']),
-            monthly_mortgage_min=float(data['monthly_mortgage_min']),
             monthly_disposable_income=float(data['monthly_disposable']),
             time_horizon_years=int(data['time_horizon']),
             mortgage_term_years=int(data['mortgage_term']),
             rent_inflation=float(data['rent_inflation']),
             house_inflation=float(data['house_inflation']),
             investment_return=float(data['investment_return']),
-            mortgage_rate=float(data['mortgage_rate'])
+            mortgage_rate=float(data['mortgage_rate']),
+            min_down_payment_percent=float(data['min_down_payment_percent'])
         )
         
         # Calculate scenarios
@@ -59,4 +58,4 @@ def calculate():
         return jsonify({'success': False, 'error': str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True, port=5000) 

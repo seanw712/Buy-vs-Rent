@@ -31,16 +31,19 @@
                                 <input type="number" class="form-control" id="monthly_rent" value="{{ config.DEFAULT_MONTHLY_RENT }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="monthly_mortgage_max" class="form-label">Monthly Mortgage - Max Mortgage Scenario (€)</label>
-                                <input type="number" class="form-control" id="monthly_mortgage_max" value="{{ config.DEFAULT_MONTHLY_MORTGAGE_MAX }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="monthly_mortgage_min" class="form-label">Monthly Mortgage - Min Mortgage Scenario (€)</label>
-                                <input type="number" class="form-control" id="monthly_mortgage_min" value="{{ config.DEFAULT_MONTHLY_MORTGAGE_MIN }}" required>
-                            </div>
-                            <div class="mb-3">
                                 <label for="monthly_disposable" class="form-label">Monthly Disposable Income (€)</label>
                                 <input type="number" class="form-control" id="monthly_disposable" value="{{ config.DEFAULT_MONTHLY_DISPOSABLE }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="min_down_payment">Minimum Down Payment (%)</label>
+                                <input type="number" 
+                                       id="min_down_payment" 
+                                       value="10" 
+                                       min="0" 
+                                       max="100" 
+                                       step="1" 
+                                       required>
+                                <small class="form-text text-muted">Percentage of house price required as minimum down payment</small>
                             </div>
                             
                             <div class="accordion mb-3" id="advancedOptions">
@@ -101,6 +104,19 @@
                         <div id="loadingSpinner" class="text-center" style="display: none;">
                             <div class="spinner-border" role="status">
                                 <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="results-section">
+                            <div class="scenario-result">
+                                <!-- results content -->
+                            </div>
+                            
+                            <div class="scenario-result">
+                                <!-- results content -->
+                            </div>
+                            
+                            <div class="scenario-result">
+                                <!-- results content -->
                             </div>
                         </div>
                     </div>
