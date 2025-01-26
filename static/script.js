@@ -202,27 +202,21 @@ function getFormData() {
         monthly_disposable_income: parseFloat(document.getElementById('monthly_disposable_income').value),
         time_horizon_years: parseInt(document.getElementById('time_horizon_years').value),
         mortgage_term_years: parseInt(document.getElementById('mortgage_term_years').value),
-        rent_inflation: parseFloat(document.getElementById('rent_inflation').value) / 100,
-        house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,
-        investment_return: parseFloat(document.getElementById('investment_return').value) / 100,
-        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,
-        min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100
+        min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100,  // Convert from percentage
+        rent_inflation: parseFloat(document.getElementById('rent_inflation').value) / 100,  // Convert from percentage
+        house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,  // Convert from percentage
+        investment_return: parseFloat(document.getElementById('investment_return').value) / 100,  // Convert from percentage
+        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,  // Convert from percentage
+        cpi: parseFloat(document.getElementById('cpi').value) / 100  // Convert from percentage
     };
     return formData;
 }
 
 // Update results in the UI
 function updateResults(results) {
-    // Show results area
+    // Show results area and hide loading spinner
     document.getElementById('resultsArea').style.display = 'block';
-    
-    // Update monthly housing costs
-    document.getElementById('rent_monthly_cost').textContent = 
-        formatCurrency(results.rent.monthly_housing_cost);
-    document.getElementById('min_mortgage_monthly_cost').textContent = 
-        formatCurrency(results.min_mortgage.monthly_housing_cost);
-    document.getElementById('max_mortgage_monthly_cost').textContent = 
-        formatCurrency(results.max_mortgage.monthly_housing_cost);
+    document.getElementById('loadingSpinner').style.display = 'none';
     
     // Update results table
     updateResultsTable(results);
@@ -232,28 +226,39 @@ function updateResults(results) {
 }
 
 // Handle form submission
-document.getElementById('calculatorForm').addEventListener('submit', function(e) {
+document.getElementById('calculatorForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    const formData = getFormData();
+    // Show loading spinner and hide results
+    document.getElementById('loadingSpinner').style.display = 'block';
+    document.getElementById('resultsArea').style.display = 'none';
     
-    fetch('/calculate', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert('Error: ' + data.error);
-        } else {
-            updateResults(data);
+    try {
+        // Get form data
+        const formData = getFormData();
+        
+        // Send calculation request
+        const response = await fetch('/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const results = await response.json();
+        if (results.error) {
+            alert('Calculation error: ' + results.error);
+            document.getElementById('loadingSpinner').style.display = 'none';
+            return;
         }
-    })
-    .catch(error => {
+
+        // Update UI with results
+        updateResults(results);
+        
+    } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while calculating results.');
-    });
+        alert('An error occurred while calculating results. Please check the console for details.');
+        document.getElementById('loadingSpinner').style.display = 'none';
+    }
 }); 
