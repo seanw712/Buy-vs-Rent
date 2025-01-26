@@ -69,8 +69,8 @@ class ScenarioResults:
         monthly_mortgage_min (float): Minimum monthly mortgage payment.
         monthly_mortgage_max (float): Maximum monthly mortgage payment.
     """
-    principal_investment_value: float
-    monthly_investment_value: float
+    principal_investment_value: float = 0.0
+    monthly_investment_value: float = 0.0
     house_value: float = 0.0
     remaining_mortgage: float = 0.0
     total_interest_paid: float = 0.0
@@ -81,26 +81,27 @@ class ScenarioResults:
     @property
     def final_investment_value(self) -> float:
         """Total value of all investments."""
-        return self.principal_investment_value + self.monthly_investment_value
+        return max(0.0, (self.principal_investment_value or 0.0) + (self.monthly_investment_value or 0.0))
     
     @property
     def net_worth(self) -> float:
         """Total net worth including all assets and liabilities."""
-        return self.final_investment_value + self.house_value - self.remaining_mortgage
+        return (self.principal_investment_value or 0.0) + \
+               (self.monthly_investment_value or 0.0) + \
+               (self.house_value or 0.0) - \
+               (self.remaining_mortgage or 0.0)
 
-def calculate_future_value(principal: float, monthly_payment: float, 
-                         years: int, annual_rate: float) -> float:
+def calculate_future_value_principal(principal: float, years: int, annual_rate: float) -> float:
     """
-    Calculate future value of an investment with monthly contributions.
+    Calculate future value of a fixed principal investment.
     
     Args:
         principal (float): Initial investment amount.
-        monthly_payment (float): Monthly contribution amount.
         years (int): Investment period in years.
         annual_rate (float): Annual return rate (as decimal).
     
     Returns:
-        float: Future value of the investment.
+        float: Future value of the principal investment.
     """
     try:
         if years <= 0:
@@ -109,30 +110,14 @@ def calculate_future_value(principal: float, monthly_payment: float,
         if principal < 0:
             principal = 0
             
-        monthly_rate = annual_rate / 12
-        n_months = years * 12
-        
         # Future value of initial principal (prevent negative growth)
         fv_principal = max(0, principal * (1 + annual_rate) ** years)
         
-        # Future value of monthly payments (using annuity formula)
-        if abs(monthly_rate) < 1e-10:  # Effectively zero rate
-            fv_payments = monthly_payment * n_months
-        else:
-            # Use safer calculation method for small rates
-            if abs(monthly_rate) < 0.01:
-                # Use sum of geometric series for small rates
-                fv_payments = monthly_payment * sum((1 + monthly_rate) ** i for i in range(n_months))
-            else:
-                # Standard formula for larger rates
-                fv_payments = monthly_payment * ((1 + monthly_rate) ** n_months - 1) / monthly_rate
-        
-        return max(0, fv_principal + fv_payments)
+        return fv_principal
         
     except Exception as e:
         print(f"Future value calculation error: principal={principal}, " +
-              f"monthly_payment={monthly_payment}, years={years}, " +
-              f"annual_rate={annual_rate}")
+              f"years={years}, annual_rate={annual_rate}")
         raise ValueError(str(e))
 
 def calculate_mortgage_payment(principal: float, annual_rate: float, years: int) -> float:
@@ -238,39 +223,36 @@ def calculate_remaining_mortgage(principal: float, payment: float,
               f"years={years_elapsed}")
         raise ValueError(str(e))
 
-def calculate_investment_growth_with_varying_contributions(
-    principal: float,
+def calculate_future_value_monthly_investment(
     initial_monthly_disposable: float,
     initial_monthly_housing_cost: float,
     years: int,
     investment_return: float,
     cpi: float,
-    housing_cost_inflation: float = 0.0,
+    is_fixed_housing_cost: bool = False
 ) -> float:
     """
-    Calculate investment growth with yearly-adjusted contributions.
+    Calculate future value of monthly investments from disposable income minus housing costs.
+    For rent scenario: both disposable income and rent grow with CPI.
+    For buy scenario: only disposable income grows with CPI, mortgage is fixed.
     
     Args:
-        principal: Initial investment amount
         initial_monthly_disposable: Starting monthly disposable income
         initial_monthly_housing_cost: Starting housing cost (rent or mortgage)
         years: Investment period in years
         investment_return: Annual investment return rate
-        cpi: Annual inflation rate for disposable income
-        housing_cost_inflation: Annual inflation rate for housing costs
+        cpi: Annual inflation rate for income (and rent if applicable)
+        is_fixed_housing_cost: If True, housing cost doesn't grow with inflation (for mortgage)
     
     Returns:
-        float: Final investment value
+        float: Future value of all monthly investments
     """
     try:
         if years <= 0:
-            return principal
-            
-        if principal < 0:
-            principal = 0
+            return 0.0
             
         monthly_rate = investment_return / 12
-        total_value = principal
+        total_value = 0.0
         
         # Year by year calculation
         for year in range(years):
@@ -278,57 +260,61 @@ def calculate_investment_growth_with_varying_contributions(
             monthly_disposable = initial_monthly_disposable * (1 + cpi) ** year
             
             # Calculate this year's housing cost
-            monthly_housing = initial_monthly_housing_cost * (1 + housing_cost_inflation) ** year
+            if is_fixed_housing_cost:
+                monthly_housing = initial_monthly_housing_cost  # Fixed mortgage payment
+            else:
+                monthly_housing = initial_monthly_housing_cost * (1 + cpi) ** year  # Growing rent
             
-            # Calculate this year's monthly investment amount (ensure non-negative)
+            # Calculate this year's monthly investment amount
             monthly_investment = max(0, monthly_disposable - monthly_housing)
             
-            # Grow existing total for one year (prevent negative growth)
-            total_value = max(0, total_value * (1 + investment_return))
-            
-            # Add and grow monthly contributions
+            # Add and grow this year's monthly investments
             for month in range(12):
+                # Add this month's investment
                 total_value += monthly_investment
-                # Prevent negative growth on monthly basis
-                total_value = max(0, total_value * (1 + monthly_rate))
+                # Grow total for one month
+                total_value *= (1 + monthly_rate)
         
         return max(0, total_value)
         
     except Exception as e:
-        # Log the error with all parameters for debugging
-        print(f"Investment calculation error: principal={principal}, " +
-              f"monthly_disposable={initial_monthly_disposable}, " +
-              f"housing_cost={initial_monthly_housing_cost}, " +
+        print(f"Monthly investment calculation error: " +
+              f"disposable={initial_monthly_disposable}, " +
+              f"housing={initial_monthly_housing_cost}, " +
               f"years={years}, return={investment_return}, " +
-              f"cpi={cpi}, housing_inflation={housing_cost_inflation}")
+              f"cpi={cpi}, fixed={is_fixed_housing_cost}")
         raise ValueError(str(e))
 
 def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
     """Calculate results for rent and invest scenario."""
     try:
-        # Calculate investment growth with varying contributions
-        total_investment = calculate_investment_growth_with_varying_contributions(
-            principal=inputs.initial_savings,
-            initial_monthly_disposable=inputs.monthly_disposable_income,
-            initial_monthly_housing_cost=inputs.monthly_rent,
+        # Calculate growth of initial savings (principal only)
+        principal_growth = calculate_future_value_principal(
+            principal=max(0, inputs.initial_savings),
             years=inputs.time_horizon_years,
-            investment_return=inputs.investment_return,
-            cpi=inputs.cpi,
-            housing_cost_inflation=inputs.cpi  # Use CPI for rent growth
+            annual_rate=inputs.investment_return
+        )
+        
+        # Calculate investment growth from monthly contributions
+        total_investment = calculate_future_value_monthly_investment(
+            initial_monthly_disposable=max(0, inputs.monthly_disposable_income),
+            initial_monthly_housing_cost=max(0, inputs.monthly_rent),
+            years=max(1, inputs.time_horizon_years),
+            investment_return=max(0, inputs.investment_return),
+            cpi=max(0, inputs.cpi),
+            is_fixed_housing_cost=False
         )
         
         # Calculate total rent paid with inflation
         total_rent = 0
-        monthly_rent = inputs.monthly_rent
+        monthly_rent = max(0, inputs.monthly_rent)
         for year in range(inputs.time_horizon_years):
             total_rent += monthly_rent * 12
-            monthly_rent *= (1 + inputs.cpi)  # Use CPI for rent growth
+            monthly_rent *= (1 + inputs.cpi)
         
-        # Split total investment between principal and monthly for consistent reporting
-        monthly_investment_ratio = 0.7  # Approximate ratio based on typical scenario
         return ScenarioResults(
-            principal_investment_value=total_investment * (1 - monthly_investment_ratio),
-            monthly_investment_value=total_investment * monthly_investment_ratio,
+            principal_investment_value=principal_growth,  # Growth of initial savings only
+            monthly_investment_value=total_investment,  # Growth of monthly contributions
             house_value=0.0,
             remaining_mortgage=0.0,
             total_interest_paid=0.0,
@@ -345,7 +331,7 @@ def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> Scenari
     """Calculate results for buying scenario."""
     try:
         # Calculate total purchase cost including fees
-        total_house_cost = inputs.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT)
+        total_house_cost = max(0, inputs.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT))
         
         # Calculate mortgage amounts for both scenarios
         max_mortgage_amount = total_house_cost * (1 - inputs.min_down_payment_percent)
@@ -358,14 +344,14 @@ def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> Scenari
         # Calculate monthly payments for both scenarios
         max_monthly_payment = calculate_mortgage_payment(
             principal=max_mortgage_amount,
-            annual_rate=inputs.mortgage_rate,
-            years=inputs.mortgage_term_years
+            annual_rate=max(0, inputs.mortgage_rate),
+            years=max(1, inputs.mortgage_term_years)
         )
         
         min_monthly_payment = calculate_mortgage_payment(
             principal=min_mortgage_amount,
-            annual_rate=inputs.mortgage_rate,
-            years=inputs.mortgage_term_years
+            annual_rate=max(0, inputs.mortgage_rate),
+            years=max(1, inputs.mortgage_term_years)
         )
         
         # Select current scenario's values
@@ -377,29 +363,33 @@ def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> Scenari
         remaining_mortgage, total_interest = calculate_remaining_mortgage(
             principal=mortgage_amount,
             payment=monthly_payment,
-            annual_rate=inputs.mortgage_rate,
+            annual_rate=max(0, inputs.mortgage_rate),
             years_elapsed=min(inputs.time_horizon_years, inputs.mortgage_term_years)
         )
         
         # Calculate future house value (prevent negative growth)
         future_house_value = max(0, inputs.house_cost * (1 + inputs.house_inflation) ** inputs.time_horizon_years)
         
-        # Calculate investment growth with varying contributions
-        total_investment = calculate_investment_growth_with_varying_contributions(
+        # Calculate growth of remaining initial savings (after down payment)
+        principal_growth = calculate_future_value_principal(
             principal=max(0, inputs.initial_savings - down_payment),
-            initial_monthly_disposable=inputs.monthly_disposable_income,
-            initial_monthly_housing_cost=monthly_payment,  # Fixed mortgage payment
             years=inputs.time_horizon_years,
-            investment_return=inputs.investment_return,
-            cpi=inputs.cpi,
-            housing_cost_inflation=0  # Mortgage payments don't increase
+            annual_rate=inputs.investment_return
         )
         
-        # Split total investment between principal and monthly for consistent reporting
-        monthly_investment_ratio = 0.7  # Approximate ratio based on typical scenario
+        # Calculate investment growth from monthly contributions
+        total_investment = calculate_future_value_monthly_investment(
+            initial_monthly_disposable=max(0, inputs.monthly_disposable_income),
+            initial_monthly_housing_cost=monthly_payment,
+            years=max(1, inputs.time_horizon_years),
+            investment_return=max(0, inputs.investment_return),
+            cpi=max(0, inputs.cpi),
+            is_fixed_housing_cost=True
+        )
+        
         return ScenarioResults(
-            principal_investment_value=total_investment * (1 - monthly_investment_ratio),
-            monthly_investment_value=total_investment * monthly_investment_ratio,
+            principal_investment_value=principal_growth,  # Growth of initial savings only
+            monthly_investment_value=total_investment,  # Growth of monthly contributions
             house_value=future_house_value,
             remaining_mortgage=remaining_mortgage,
             total_interest_paid=total_interest,

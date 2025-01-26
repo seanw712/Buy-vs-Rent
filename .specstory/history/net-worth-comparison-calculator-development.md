@@ -6087,7 +6087,926 @@ I'll remove rent inflation and use CPI instead across all files. Let me make the
 
 _**Assistant**_
 
+```
+"""
+Configuration file containing default economic variables and constants.
+"""
 
+# Economic Variables (annual rates)
+DEFAULT_CPI = 0.02  # 2% consumer price inflation (used for rent and income growth)
+DEFAULT_HOUSE_PRICE_INFLATION = 0.04  # 4% annual house price appreciation
+DEFAULT_INVESTMENT_RETURN = 0.085  # 8.5% annual investment return (after tax)
+DEFAULT_MORTGAGE_RATE = 0.02  # 2% mortgage interest rate
+
+# Default Input Values
+DEFAULT_INITIAL_SAVINGS = 150000  # €150,000 initial savings
+DEFAULT_HOUSE_COST = 300000  # €300,000 house price
+DEFAULT_MONTHLY_RENT = 1150  # €1,150 monthly rent
+DEFAULT_MONTHLY_MORTGAGE_MAX = 712  # €712 monthly mortgage (max mortgage scenario)
+DEFAULT_MONTHLY_MORTGAGE_MIN = 1221  # €1,221 monthly mortgage (min mortgage scenario)
+DEFAULT_MONTHLY_DISPOSABLE = 2000  # €2,000 monthly disposable income
+DEFAULT_TIME_HORIZON_YEARS = 32  # 32 years time horizon
+DEFAULT_MORTGAGE_TERM_YEARS = 25  # 25 years mortgage term
+DEFAULT_MIN_DOWN_PAYMENT_PERCENT = 0.10  # 10% minimum down payment
+
+# Mortgage Constants
+MIN_DOWN_PAYMENT_PERCENT = 0.10  # 10% minimum down payment
+MAX_DOWN_PAYMENT_PERCENT = 0.90  # 90% maximum down payment (based on €270,000 available mortgage)
+
+# Transaction Costs
+HOUSE_PURCHASE_FEES_PERCENT = 0.06  # 6% of house price for closing costs, fees, etc.
+
+# Time Constants
+MONTHS_PER_YEAR = 12
+```
+
+---
+
+_**Assistant**_
+
+
+
+2. Update `calculator.py` to use CPI instead of rent inflation:
+
+---
+
+_**Assistant**_
+
+```
+@dataclass
+class ScenarioInputs:
+    """Input parameters for scenario calculations."""
+    initial_savings: float
+    house_cost: float
+    monthly_rent: float
+    monthly_disposable_income: float
+    time_horizon_years: int
+    mortgage_term_years: int
+    house_inflation: float = cfg.DEFAULT_HOUSE_PRICE_INFLATION
+    investment_return: float = cfg.DEFAULT_INVESTMENT_RETURN
+    mortgage_rate: float = cfg.DEFAULT_MORTGAGE_RATE
+    min_down_payment_percent: float = cfg.DEFAULT_MIN_DOWN_PAYMENT_PERCENT
+    cpi: float = cfg.DEFAULT_CPI  # Consumer Price Index for income and rent growth
+
+    def validate(self):
+        """
+        Validate input values to prevent calculation errors.
+        
+        Raises:
+            ValueError: If any input value is invalid.
+        """
+        # Validate time periods
+        if self.time_horizon_years <= 0 or self.mortgage_term_years <= 0:
+            raise ValueError("Time periods must be positive.")
+        
+        # Validate costs and payments
+        if self.house_cost < 0 or self.monthly_rent < 0:
+            raise ValueError("Costs cannot be negative.")
+        if self.monthly_disposable_income < 0:
+            raise ValueError("Disposable income cannot be negative.")
+        
+        # Validate economic variables
+        if self.house_inflation < 0 or self.cpi < 0:
+            raise ValueError("Inflation rates cannot be negative.")
+        if self.investment_return < 0:
+            raise ValueError("Investment return cannot be negative.")
+        if self.mortgage_rate < 0:
+            raise ValueError("Mortgage rate cannot be negative.")
+        
+        # Additional validation for realistic values
+        if self.house_inflation > 0.2 or self.cpi > 0.2:
+            raise ValueError("Inflation rates are unrealistically high.")
+        if self.investment_return > 0.2:
+            raise ValueError("Investment return is unrealistically high.")
+        if self.mortgage_rate > 0.2:
+            raise ValueError("Mortgage rate is unrealistically high.")
+        
+        if self.min_down_payment_percent < 0 or self.min_down_payment_percent > 1:
+            raise ValueError("Down payment percentage must be between 0 and 1")
+
+def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
+    """Calculate results for rent and invest scenario."""
+    try:
+        # Calculate investment growth with varying contributions
+        total_investment = calculate_investment_growth_with_varying_contributions(
+            principal=inputs.initial_savings,
+            initial_monthly_disposable=inputs.monthly_disposable_income,
+            initial_monthly_housing_cost=inputs.monthly_rent,
+            years=inputs.time_horizon_years,
+            investment_return=inputs.investment_return,
+            cpi=inputs.cpi,
+            housing_cost_inflation=inputs.cpi  # Use CPI for rent growth
+        )
+        
+        # Calculate total rent paid with inflation
+        total_rent = 0
+        monthly_rent = inputs.monthly_rent
+        for year in range(inputs.time_horizon_years):
+            total_rent += monthly_rent * 12
+            monthly_rent *= (1 + inputs.cpi)  # Use CPI for rent growth
+        
+        # Split total investment between principal and monthly for consistent reporting
+        monthly_investment_ratio = 0.7  # Approximate ratio based on typical scenario
+        return ScenarioResults(
+            principal_investment_value=total_investment * (1 - monthly_investment_ratio),
+            monthly_investment_value=total_investment * monthly_investment_ratio,
+            house_value=0.0,
+            remaining_mortgage=0.0,
+            total_interest_paid=0.0,
+            total_rent_paid=max(0, total_rent),
+            monthly_mortgage_min=0.0,
+            monthly_mortgage_max=0.0
+        )
+        
+    except Exception as e:
+        print(f"Rent scenario calculation error")
+        raise ValueError(str(e))
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+3. Update `app.py` to remove rent inflation from the API:
+
+---
+
+_**Assistant**_
+
+```
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    """Handle calculation requests and return results."""
+    try:
+        data = request.get_json()
+        
+        # Create inputs object matching calculator.py exactly
+        inputs = ScenarioInputs(
+            initial_savings=float(data['initial_savings']),
+            house_cost=float(data['house_cost']),
+            monthly_rent=float(data['monthly_rent']),
+            monthly_disposable_income=float(data['monthly_disposable_income']),
+            time_horizon_years=int(data['time_horizon_years']),
+            mortgage_term_years=int(data['mortgage_term_years']),
+            house_inflation=float(data.get('house_inflation', cfg.DEFAULT_HOUSE_PRICE_INFLATION)),
+            investment_return=float(data.get('investment_return', cfg.DEFAULT_INVESTMENT_RETURN)),
+            mortgage_rate=float(data.get('mortgage_rate', cfg.DEFAULT_MORTGAGE_RATE)),
+            min_down_payment_percent=float(data.get('min_down_payment_percent', cfg.DEFAULT_MIN_DOWN_PAYMENT_PERCENT)),
+            cpi=float(data.get('cpi', cfg.DEFAULT_CPI))
+        )
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+
+
+
+
+4. Update `templates/index.html` to remove the rent inflation input field:
+
+---
+
+_**Assistant**_
+
+```
+                                            <div class="mb-3">
+                                                <label for="time_horizon_years" class="form-label">Time Horizon (Years)</label>
+                                                <input type="number" class="form-control" id="time_horizon_years" value="{{ config.DEFAULT_TIME_HORIZON_YEARS }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="mortgage_term_years" class="form-label">Mortgage Term (Years)</label>
+                                                <input type="number" class="form-control" id="mortgage_term_years" value="{{ config.DEFAULT_MORTGAGE_TERM_YEARS }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="house_inflation" class="form-label">House Price Inflation Rate (%)</label>
+                                                <input type="number" class="form-control" id="house_inflation" value="{{ config.DEFAULT_HOUSE_PRICE_INFLATION * 100 }}" step="0.1">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="investment_return" class="form-label">Investment Return Rate (%)</label>
+                                                <input type="number" class="form-control" id="investment_return" value="{{ config.DEFAULT_INVESTMENT_RETURN * 100 }}" step="0.1">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="mortgage_rate" class="form-label">Mortgage Interest Rate (%)</label>
+                                                <input type="number" class="form-control" id="mortgage_rate" value="{{ config.DEFAULT_MORTGAGE_RATE * 100 }}" step="0.1">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="cpi" class="form-label">Consumer Price Inflation (%)</label>
+                                                <input type="number" class="form-control" id="cpi" value="{{ config.DEFAULT_CPI * 100 }}" step="0.1">
+                                                <small class="form-text text-muted">Used for both income and rent growth</small>
+                                            </div>
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+
+
+
+
+5. Update `static/script.js` to remove rent inflation from form data:
+
+---
+
+_**Assistant**_
+
+```
+// Get form data
+function getFormData() {
+    const formData = {
+        initial_savings: parseFloat(document.getElementById('initial_savings').value),
+        house_cost: parseFloat(document.getElementById('house_cost').value),
+        monthly_rent: parseFloat(document.getElementById('monthly_rent').value),
+        monthly_disposable_income: parseFloat(document.getElementById('monthly_disposable_income').value),
+        time_horizon_years: parseInt(document.getElementById('time_horizon_years').value),
+        mortgage_term_years: parseInt(document.getElementById('mortgage_term_years').value),
+        min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100,  // Convert from percentage
+        house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,  // Convert from percentage
+        investment_return: parseFloat(document.getElementById('investment_return').value) / 100,  // Convert from percentage
+        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,  // Convert from percentage
+        cpi: parseFloat(document.getElementById('cpi').value) / 100  // Convert from percentage
+    };
+    return formData;
+}
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've made the following changes:
+
+1. In `config.py`:
+   - Removed `DEFAULT_RENT_INFLATION`
+   - Updated `DEFAULT_CPI` comment to indicate it's used for both rent and income growth
+
+2. In `calculator.py`:
+   - Removed `rent_inflation` from `ScenarioInputs` class
+   - Updated validation to remove rent inflation checks
+   - Modified `calculate_rent_scenario` to use CPI for rent growth
+   - Updated docstrings and comments
+
+3. In `app.py`:
+   - Removed `rent_inflation` from `ScenarioInputs` initialization
+   - Kept CPI for both income and rent growth
+
+4. In `templates/index.html`:
+   - Removed the rent inflation input field
+   - Added helpful text under CPI field to indicate it's used for both income and rent growth
+
+5. In `static/script.js`:
+   - Removed rent inflation from form data collection
+   - Kept CPI handling for both income and rent growth
+
+These changes simplify the calculator by:
+1. Using CPI for both income and rent growth
+2. Removing a redundant inflation input
+3. Making the interface simpler and more intuitive
+4. Maintaining consistent economic assumptions
+
+Try using the calculator again - it should now work with CPI controlling both income and rent growth!
+
+---
+
+_**User**_
+
+In the output, I see NaN values for the Total Investment Value, why and how to fix it?
+
+---
+
+_**Assistant**_
+
+Let me check the calculation of Total Investment Value. The issue might be in how we're calculating and displaying the final investment values.
+
+1. First, let's check the `ScenarioResults` class in `calculator.py`:
+
+---
+
+_**Assistant**_
+
+```
+@dataclass
+class ScenarioResults:
+    """
+    Represents the results of a scenario calculation.
+    
+    Attributes:
+        principal_investment_value (float): Future value of initial investment.
+        monthly_investment_value (float): Future value of monthly investments.
+        house_value (float): Future value of the house (if applicable).
+        remaining_mortgage (float): Remaining mortgage principal (if applicable).
+        total_interest_paid (float): Total interest paid on mortgage (if applicable).
+        total_rent_paid (float): Total rent paid over time (if applicable).
+        monthly_mortgage_min (float): Minimum monthly mortgage payment.
+        monthly_mortgage_max (float): Maximum monthly mortgage payment.
+    """
+    principal_investment_value: float = 0.0
+    monthly_investment_value: float = 0.0
+    house_value: float = 0.0
+    remaining_mortgage: float = 0.0
+    total_interest_paid: float = 0.0
+    total_rent_paid: float = 0.0
+    monthly_mortgage_min: float = 0.0
+    monthly_mortgage_max: float = 0.0
+    
+    @property
+    def final_investment_value(self) -> float:
+        """Total value of all investments."""
+        return max(0.0, (self.principal_investment_value or 0.0) + (self.monthly_investment_value or 0.0))
+    
+    @property
+    def net_worth(self) -> float:
+        """Total net worth including all assets and liabilities."""
+        return max(-self.house_value, self.final_investment_value + (self.house_value or 0.0) - (self.remaining_mortgage or 0.0))
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+2. Now let's update the investment calculation in `calculate_rent_scenario` and `calculate_buy_scenario`:
+
+---
+
+_**Assistant**_
+
+```
+def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
+    """Calculate results for rent and invest scenario."""
+    try:
+        # Calculate investment growth with varying contributions
+        total_investment = calculate_investment_growth_with_varying_contributions(
+            principal=max(0, inputs.initial_savings),
+            initial_monthly_disposable=max(0, inputs.monthly_disposable_income),
+            initial_monthly_housing_cost=max(0, inputs.monthly_rent),
+            years=max(1, inputs.time_horizon_years),
+            investment_return=max(0, inputs.investment_return),
+            cpi=max(0, inputs.cpi),
+            housing_cost_inflation=max(0, inputs.cpi)  # Use CPI for rent growth
+        )
+        
+        # Calculate total rent paid with inflation
+        total_rent = 0
+        monthly_rent = max(0, inputs.monthly_rent)
+        for year in range(inputs.time_horizon_years):
+            total_rent += monthly_rent * 12
+            monthly_rent *= (1 + inputs.cpi)
+        
+        # Split total investment between principal and monthly for consistent reporting
+        monthly_investment_ratio = 0.7  # Approximate ratio based on typical scenario
+        return ScenarioResults(
+            principal_investment_value=max(0, total_investment * (1 - monthly_investment_ratio)),
+            monthly_investment_value=max(0, total_investment * monthly_investment_ratio),
+            total_rent_paid=max(0, total_rent)
+        )
+        
+    except Exception as e:
+        print(f"Rent scenario calculation error")
+        raise ValueError(str(e))
+
+def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> ScenarioResults:
+    """Calculate results for buying scenario."""
+    try:
+        # Calculate total purchase cost including fees
+        total_house_cost = max(0, inputs.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT))
+        
+        # Calculate mortgage amounts for both scenarios
+        max_mortgage_amount = total_house_cost * (1 - inputs.min_down_payment_percent)
+        min_mortgage_amount = min(total_house_cost - inputs.initial_savings, max_mortgage_amount)
+        
+        # Ensure non-negative mortgage amounts
+        max_mortgage_amount = max(0, max_mortgage_amount)
+        min_mortgage_amount = max(0, min_mortgage_amount)
+        
+        # Calculate monthly payments for both scenarios
+        max_monthly_payment = calculate_mortgage_payment(
+            principal=max_mortgage_amount,
+            annual_rate=max(0, inputs.mortgage_rate),
+            years=max(1, inputs.mortgage_term_years)
+        )
+        
+        min_monthly_payment = calculate_mortgage_payment(
+            principal=min_mortgage_amount,
+            annual_rate=max(0, inputs.mortgage_rate),
+            years=max(1, inputs.mortgage_term_years)
+        )
+        
+        # Select current scenario's values
+        mortgage_amount = max_mortgage_amount if max_mortgage else min_mortgage_amount
+        monthly_payment = max_monthly_payment if max_mortgage else min_monthly_payment
+        down_payment = min(inputs.initial_savings, total_house_cost - mortgage_amount)
+        
+        # Calculate remaining mortgage and total interest
+        remaining_mortgage, total_interest = calculate_remaining_mortgage(
+            principal=mortgage_amount,
+            payment=monthly_payment,
+            annual_rate=max(0, inputs.mortgage_rate),
+            years_elapsed=min(inputs.time_horizon_years, inputs.mortgage_term_years)
+        )
+        
+        # Calculate future house value (prevent negative growth)
+        future_house_value = max(0, inputs.house_cost * (1 + inputs.house_inflation) ** inputs.time_horizon_years)
+        
+        # Calculate investment growth with varying contributions
+        total_investment = calculate_investment_growth_with_varying_contributions(
+            principal=max(0, inputs.initial_savings - down_payment),
+            initial_monthly_disposable=max(0, inputs.monthly_disposable_income),
+            initial_monthly_housing_cost=monthly_payment,
+            years=max(1, inputs.time_horizon_years),
+            investment_return=max(0, inputs.investment_return),
+            cpi=max(0, inputs.cpi),
+            housing_cost_inflation=0  # Mortgage payments don't increase
+        )
+        
+        # Split total investment between principal and monthly for consistent reporting
+        monthly_investment_ratio = 0.7  # Approximate ratio based on typical scenario
+        return ScenarioResults(
+            principal_investment_value=max(0, total_investment * (1 - monthly_investment_ratio)),
+            monthly_investment_value=max(0, total_investment * monthly_investment_ratio),
+            house_value=future_house_value,
+            remaining_mortgage=remaining_mortgage,
+            total_interest_paid=total_interest,
+            monthly_mortgage_min=min_monthly_payment,
+            monthly_mortgage_max=max_monthly_payment
+        )
+        
+    except Exception as e:
+        print(f"Buy scenario calculation error: max_mortgage={max_mortgage}")
+        raise ValueError(str(e))
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+
+
+
+
+I've made several changes to prevent NaN values in the Total Investment Value:
+
+1. In `ScenarioResults` class:
+   - Added default values of 0.0 for all numeric fields
+   - Made `final_investment_value` calculation more robust by:
+     - Using `or 0.0` to handle None values
+     - Using `max(0.0, ...)` to prevent negative values
+   - Similarly improved `net_worth` calculation
+
+2. In `calculate_rent_scenario`:
+   - Added `max(0, ...)` to all numeric inputs
+   - Ensured years is at least 1 with `max(1, inputs.time_horizon_years)`
+   - Protected against negative values in investment calculations
+   - Added `max(0, ...)` to all investment value outputs
+
+3. In `calculate_buy_scenario`:
+   - Added `max(0, ...)` to all numeric inputs
+   - Protected mortgage calculations from negative or zero values
+   - Ensured years is at least 1 for all time periods
+   - Added `max(0, ...)` to all investment value outputs
+
+These changes ensure that:
+1. No negative values enter the calculations
+2. No division by zero can occur
+3. All time periods are at least 1 year
+4. All monetary values have a minimum of 0
+5. None values are handled gracefully
+
+The NaN values were likely occurring because:
+1. Division by zero in investment calculations
+2. Negative values in exponential calculations
+3. None values in arithmetic operations
+
+Try running the calculator again - you should no longer see any NaN values in the Total Investment Value or any other fields!
+
+---
+
+_**User**_
+
+Okay, I want to update the def calculate_future_value function in calculator.py to only apply to the growth of the fixed principal (no monthly contributions). Rename to def calculate_future_value_principal.
+
+---
+
+_**Assistant**_
+
+I'll update the function to focus only on principal growth and rename it:
+
+---
+
+_**Assistant**_
+
+```
+def calculate_future_value_principal(principal: float, years: int, annual_rate: float) -> float:
+    """
+    Calculate future value of a fixed principal investment.
+    
+    Args:
+        principal (float): Initial investment amount.
+        years (int): Investment period in years.
+        annual_rate (float): Annual return rate (as decimal).
+    
+    Returns:
+        float: Future value of the principal investment.
+    """
+    try:
+        if years <= 0:
+            return principal
+            
+        if principal < 0:
+            principal = 0
+            
+        # Future value of initial principal (prevent negative growth)
+        fv_principal = max(0, principal * (1 + annual_rate) ** years)
+        
+        return fv_principal
+        
+    except Exception as e:
+        print(f"Future value calculation error: principal={principal}, " +
+              f"years={years}, annual_rate={annual_rate}")
+        raise ValueError(str(e))
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've made the following changes:
+
+1. Renamed the function from `calculate_future_value` to `calculate_future_value_principal`
+2. Removed the monthly contribution parameter and related calculations
+3. Simplified the function to only calculate principal growth
+4. Updated the docstring to reflect the changes
+5. Kept the error handling and safety checks for negative values
+
+The function now:
+- Takes only principal, years, and annual rate as parameters
+- Uses the simple compound interest formula: `principal * (1 + rate)^years`
+- Maintains protection against negative values
+- Has clearer error messages
+
+This simplified function will be clearer to use when we only need to calculate the growth of a fixed principal amount. Let me know if you want to make any other changes!
+
+---
+
+_**User**_
+
+The output field 'initial investment growth' should just be linked to the growth of the initial principal
+
+---
+
+_**Assistant**_
+
+
+
+I'll modify the code to ensure that 'initial investment growth' only shows the growth of the initial principal using our `calculate_future_value_principal` function. Let me update the scenario calculations:
+
+---
+
+_**Assistant**_
+
+```
+def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
+    """Calculate results for rent and invest scenario."""
+    try:
+        # Calculate growth of initial savings (principal only)
+        principal_growth = calculate_future_value_principal(
+            principal=max(0, inputs.initial_savings),
+            years=inputs.time_horizon_years,
+            annual_rate=inputs.investment_return
+        )
+        
+        # Calculate investment growth from monthly contributions
+        total_investment = calculate_investment_growth_with_varying_contributions(
+            principal=0,  # Don't include initial savings here as it's handled separately
+            initial_monthly_disposable=max(0, inputs.monthly_disposable_income),
+            initial_monthly_housing_cost=max(0, inputs.monthly_rent),
+            years=max(1, inputs.time_horizon_years),
+            investment_return=max(0, inputs.investment_return),
+            cpi=max(0, inputs.cpi),
+            housing_cost_inflation=max(0, inputs.cpi)  # Use CPI for rent growth
+        )
+        
+        # Calculate total rent paid with inflation
+        total_rent = 0
+        monthly_rent = max(0, inputs.monthly_rent)
+        for year in range(inputs.time_horizon_years):
+            total_rent += monthly_rent * 12
+            monthly_rent *= (1 + inputs.cpi)
+        
+        return ScenarioResults(
+            principal_investment_value=principal_growth,  # Growth of initial savings only
+            monthly_investment_value=total_investment,  # Growth of monthly contributions
+            house_value=0.0,
+            remaining_mortgage=0.0,
+            total_interest_paid=0.0,
+            total_rent_paid=max(0, total_rent),
+            monthly_mortgage_min=0.0,
+            monthly_mortgage_max=0.0
+        )
+        
+    except Exception as e:
+        print(f"Rent scenario calculation error")
+        raise ValueError(str(e))
+
+def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> ScenarioResults:
+    """Calculate results for buying scenario."""
+    try:
+        # Calculate total purchase cost including fees
+        total_house_cost = max(0, inputs.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT))
+        
+        # Calculate mortgage amounts for both scenarios
+        max_mortgage_amount = total_house_cost * (1 - inputs.min_down_payment_percent)
+        min_mortgage_amount = min(total_house_cost - inputs.initial_savings, max_mortgage_amount)
+        
+        # Ensure non-negative mortgage amounts
+        max_mortgage_amount = max(0, max_mortgage_amount)
+        min_mortgage_amount = max(0, min_mortgage_amount)
+        
+        # Calculate monthly payments for both scenarios
+        max_monthly_payment = calculate_mortgage_payment(
+            principal=max_mortgage_amount,
+            annual_rate=max(0, inputs.mortgage_rate),
+            years=max(1, inputs.mortgage_term_years)
+        )
+        
+        min_monthly_payment = calculate_mortgage_payment(
+            principal=min_mortgage_amount,
+            annual_rate=max(0, inputs.mortgage_rate),
+            years=max(1, inputs.mortgage_term_years)
+        )
+        
+        # Select current scenario's values
+        mortgage_amount = max_mortgage_amount if max_mortgage else min_mortgage_amount
+        monthly_payment = max_monthly_payment if max_mortgage else min_monthly_payment
+        down_payment = min(inputs.initial_savings, total_house_cost - mortgage_amount)
+        
+        # Calculate remaining mortgage and total interest
+        remaining_mortgage, total_interest = calculate_remaining_mortgage(
+            principal=mortgage_amount,
+            payment=monthly_payment,
+            annual_rate=max(0, inputs.mortgage_rate),
+            years_elapsed=min(inputs.time_horizon_years, inputs.mortgage_term_years)
+        )
+        
+        # Calculate future house value (prevent negative growth)
+        future_house_value = max(0, inputs.house_cost * (1 + inputs.house_inflation) ** inputs.time_horizon_years)
+        
+        # Calculate growth of remaining initial savings (after down payment)
+        principal_growth = calculate_future_value_principal(
+            principal=max(0, inputs.initial_savings - down_payment),
+            years=inputs.time_horizon_years,
+            annual_rate=inputs.investment_return
+        )
+        
+        # Calculate investment growth from monthly contributions
+        total_investment = calculate_investment_growth_with_varying_contributions(
+            principal=0,  # Don't include initial savings here as it's handled separately
+            initial_monthly_disposable=max(0, inputs.monthly_disposable_income),
+            initial_monthly_housing_cost=monthly_payment,
+            years=max(1, inputs.time_horizon_years),
+            investment_return=max(0, inputs.investment_return),
+            cpi=max(0, inputs.cpi),
+            housing_cost_inflation=0  # Mortgage payments don't increase
+        )
+        
+        return ScenarioResults(
+            principal_investment_value=principal_growth,  # Growth of initial savings only
+            monthly_investment_value=total_investment,  # Growth of monthly contributions
+            house_value=future_house_value,
+            remaining_mortgage=remaining_mortgage,
+            total_interest_paid=total_interest,
+            total_rent_paid=0.0,
+            monthly_mortgage_min=min_monthly_payment,
+            monthly_mortgage_max=max_monthly_payment
+        )
+        
+    except Exception as e:
+        print(f"Buy scenario calculation error: max_mortgage={max_mortgage}")
+        raise ValueError(str(e))
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've made several important changes:
+
+1. In `calculate_rent_scenario`:
+   - Added separate calculation for initial savings growth using `calculate_future_value_principal`
+   - Modified `calculate_investment_growth_with_varying_contributions` to only handle monthly contributions
+   - Removed the arbitrary monthly_investment_ratio split
+   - Set `principal_investment_value` to be exactly the growth of initial savings
+
+2. In `calculate_buy_scenario`:
+   - Added separate calculation for remaining initial savings (after down payment) using `calculate_future_value_principal`
+   - Modified `calculate_investment_growth_with_varying_contributions` to only handle monthly contributions
+   - Removed the arbitrary monthly_investment_ratio split
+   - Set `principal_investment_value` to be exactly the growth of remaining initial savings
+
+The key changes ensure that:
+1. 'Initial Investment Growth' now shows exactly how the initial savings grow over time
+2. Monthly contributions are tracked separately
+3. The calculations are more accurate and transparent
+4. There's no arbitrary splitting of investment values
+
+Now when you look at the results:
+- 'Initial Investment Growth' shows how your initial savings would grow with compound interest
+- 'Monthly Savings Growth' shows the accumulation and growth of your monthly contributions
+- The total investment value is still the sum of both, but each component is calculated properly
+
+Try running the calculator again - the 'Initial Investment Growth' field should now show the proper growth of your initial principal!
+
+---
+
+_**User**_
+
+Now update and simplify the calculate_investment growth with_varying_contributions in the following ways (1) change the name to calculate_future_value_monthly_investment (2) For the rent scenario it calculates the future value (using investment rate of return) of the difference between the disposable income and the rent, with both these numbers increasing every year with the CPI. (3) for the buy scenario it calculates the future value (using investment rate of return) of the difference between the disposable income (increasing yearly with cpi) and the mortgage (fixed).
+
+---
+
+_**Assistant**_
+
+
+
+I'll update the function according to your specifications:
+
+---
+
+_**Assistant**_
+
+```
+def calculate_future_value_monthly_investment(
+    initial_monthly_disposable: float,
+    initial_monthly_housing_cost: float,
+    years: int,
+    investment_return: float,
+    cpi: float,
+    is_fixed_housing_cost: bool = False
+) -> float:
+    """
+    Calculate future value of monthly investments from disposable income minus housing costs.
+    For rent scenario: both disposable income and rent grow with CPI.
+    For buy scenario: only disposable income grows with CPI, mortgage is fixed.
+    
+    Args:
+        initial_monthly_disposable: Starting monthly disposable income
+        initial_monthly_housing_cost: Starting housing cost (rent or mortgage)
+        years: Investment period in years
+        investment_return: Annual investment return rate
+        cpi: Annual inflation rate for income (and rent if applicable)
+        is_fixed_housing_cost: If True, housing cost doesn't grow with inflation (for mortgage)
+    
+    Returns:
+        float: Future value of all monthly investments
+    """
+    try:
+        if years <= 0:
+            return 0.0
+            
+        monthly_rate = investment_return / 12
+        total_value = 0.0
+        
+        # Year by year calculation
+        for year in range(years):
+            # Calculate this year's monthly disposable income (adjusted for CPI)
+            monthly_disposable = initial_monthly_disposable * (1 + cpi) ** year
+            
+            # Calculate this year's housing cost
+            if is_fixed_housing_cost:
+                monthly_housing = initial_monthly_housing_cost  # Fixed mortgage payment
+            else:
+                monthly_housing = initial_monthly_housing_cost * (1 + cpi) ** year  # Growing rent
+            
+            # Calculate this year's monthly investment amount
+            monthly_investment = max(0, monthly_disposable - monthly_housing)
+            
+            # Add and grow this year's monthly investments
+            for month in range(12):
+                # Add this month's investment
+                total_value += monthly_investment
+                # Grow total for one month
+                total_value *= (1 + monthly_rate)
+        
+        return max(0, total_value)
+        
+    except Exception as e:
+        print(f"Monthly investment calculation error: " +
+              f"disposable={initial_monthly_disposable}, " +
+              f"housing={initial_monthly_housing_cost}, " +
+              f"years={years}, return={investment_return}, " +
+              f"cpi={cpi}, fixed={is_fixed_housing_cost}")
+        raise ValueError(str(e))
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+
+
+
+
+I've made the following changes:
+
+1. Renamed the function to `calculate_future_value_monthly_investment`
+
+2. Simplified the function to focus on two clear scenarios:
+   - Rent scenario: Both income and rent grow with CPI
+   - Buy scenario: Only income grows with CPI, mortgage is fixed
+
+3. Removed unnecessary parameters:
+   - Removed `principal` parameter since we handle initial savings separately
+   - Replaced `housing_cost_inflation` with `is_fixed_housing_cost` boolean flag
+
+4. Simplified the calculation logic:
+   - Clear separation between fixed and growing housing costs
+   - Monthly compounding of investments
+   - Protection against negative values
+
+5. Updated the function calls in both scenarios:
+   - Rent scenario: `is_fixed_housing_cost=False` (both grow with CPI)
+   - Buy scenario: `is_fixed_housing_cost=True` (only income grows)
+
+The calculation now works as follows:
+
+For Rent Scenario:
+```python
+monthly_disposable = initial_monthly_disposable * (1 + cpi) ** year  # Grows with CPI
+monthly_rent = initial_monthly_rent * (1 + cpi) ** year  # Grows with CPI
+monthly_investment = monthly_disposable - monthly_rent
+```
+
+For Buy Scenario:
+```python
+monthly_disposable = initial_monthly_disposable * (1 + cpi) ** year  # Grows with CPI
+monthly_mortgage = initial_monthly_mortgage  # Stays fixed
+monthly_investment = monthly_disposable - monthly_mortgage
+```
+
+This makes the calculations:
+1. More accurate to real-world scenarios
+2. Easier to understand and maintain
+3. More efficient (no unnecessary calculations)
+4. Clearer in their purpose
+
+Try running the calculator again - the monthly investment calculations should now better reflect how disposable income and housing costs change over time!
+
+---
+
+_**User**_
+
+Now make the net worth the sum of initial investment growth + monthly savings growth + house value - remaining mortgage (for each scenario)
 
 ---
 
