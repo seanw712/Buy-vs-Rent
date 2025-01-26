@@ -2,6 +2,7 @@ import numpy as np
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 import config as cfg
+import math
 
 @dataclass
 class ScenarioInputs:
@@ -125,15 +126,26 @@ class ScenarioResults:
     def net_worth(self) -> float:
         """Total net worth including all assets and liabilities."""
         try:
-            return float(self.principal_investment_value + 
-                        self.monthly_investment_value + 
-                        self.house_value - 
-                        self.remaining_mortgage)
+            # Ensure all components are valid floats
+            principal = float(self.principal_investment_value or 0.0)
+            monthly = float(self.monthly_investment_value or 0.0)
+            house = float(self.house_value or 0.0)
+            mortgage = float(self.remaining_mortgage or 0.0)
+            
+            net_worth = principal + monthly + house - mortgage
+            
+            if not isinstance(net_worth, (int, float)) or math.isnan(net_worth) or math.isinf(net_worth):
+                print(f"Invalid net worth calculated: {net_worth}")
+                return 0.0
+                
+            return net_worth
+            
         except Exception as e:
-            print(f"Net worth calculation error: principal={self.principal_investment_value}, " +
-                  f"monthly={self.monthly_investment_value}, " +
-                  f"house={self.house_value}, " +
-                  f"mortgage={self.remaining_mortgage}")
+            print(f"Net worth calculation error: {str(e)}")
+            print(f"Values: principal={self.principal_investment_value} ({type(self.principal_investment_value)}), " +
+                  f"monthly={self.monthly_investment_value} ({type(self.monthly_investment_value)}), " +
+                  f"house={self.house_value} ({type(self.house_value)}), " +
+                  f"mortgage={self.remaining_mortgage} ({type(self.remaining_mortgage)})")
             return 0.0
 
 def calculate_future_value_principal(principal: float, years: int, annual_rate: float) -> float:

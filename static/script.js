@@ -3,12 +3,23 @@ let netWorthChart = null;
 
 // Format currency values
 function formatCurrency(value) {
+    // Handle invalid values
+    if (value === null || value === undefined || isNaN(value) || !isFinite(value)) {
+        console.log(`Invalid currency value: ${value} (${typeof value})`);
+        return '-';
+    }
+    // Ensure value is a number
+    const numValue = Number(value);
+    if (isNaN(numValue)) {
+        console.log(`Could not convert to number: ${value} (${typeof value})`);
+        return '-';
+    }
     return new Intl.NumberFormat('de-DE', {
         style: 'currency',
         currency: 'EUR',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
-    }).format(value);
+    }).format(numValue);
 }
 
 // Create or update the chart
@@ -159,8 +170,8 @@ function updateResultsTable(results) {
                 <tr>
                     <td>Remaining Mortgage</td>
                     <td>-</td>
-                    <td>${formatCurrency(results.max_mortgage.remaining_mortgage)}</td>
-                    <td>${formatCurrency(results.min_mortgage.remaining_mortgage)}</td>
+                    <td>${formatCurrency(-results.max_mortgage.remaining_mortgage)}</td>
+                    <td>${formatCurrency(-results.min_mortgage.remaining_mortgage)}</td>
                 </tr>
                 <tr>
                     <td>Total Interest Paid</td>
@@ -207,6 +218,34 @@ function getFormData() {
 
 // Update results in the UI
 function updateResults(results) {
+    // Debug logging for net worth values
+    console.log('Rent scenario:', {
+        net_worth: results.rent.net_worth,
+        principal: results.rent.principal_investment_value,
+        monthly: results.rent.monthly_investment_value,
+        house: results.rent.house_value,
+        mortgage: results.rent.remaining_mortgage
+    });
+    console.log('Max mortgage scenario:', {
+        net_worth: results.max_mortgage.net_worth,
+        principal: results.max_mortgage.principal_investment_value,
+        monthly: results.max_mortgage.monthly_investment_value,
+        house: results.max_mortgage.house_value,
+        mortgage: results.max_mortgage.remaining_mortgage
+    });
+    console.log('Min mortgage scenario:', {
+        net_worth: results.min_mortgage.net_worth,
+        principal: results.min_mortgage.principal_investment_value,
+        monthly: results.min_mortgage.monthly_investment_value,
+        house: results.min_mortgage.house_value,
+        mortgage: results.min_mortgage.remaining_mortgage
+    });
+    
+    // Ensure net worth values are numbers
+    results.rent.net_worth = Number(results.rent.net_worth || 0);
+    results.max_mortgage.net_worth = Number(results.max_mortgage.net_worth || 0);
+    results.min_mortgage.net_worth = Number(results.min_mortgage.net_worth || 0);
+    
     // Show results area and hide loading spinner
     document.getElementById('resultsArea').style.display = 'block';
     document.getElementById('loadingSpinner').style.display = 'none';

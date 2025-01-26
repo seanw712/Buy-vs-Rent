@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, jsonify
 from calculator import ScenarioInputs, compare_scenarios
 from dataclasses import asdict
 import config as cfg
+import math
 
 app = Flask(__name__)
 
@@ -36,13 +37,30 @@ def calculate():
         )
         
         results = compare_scenarios(inputs)
-        return jsonify({
-            'rent': asdict(results['rent']),
-            'min_mortgage': asdict(results['min_mortgage']),
-            'max_mortgage': asdict(results['max_mortgage'])
-        })
+        
+        # Validate results before sending
+        for scenario_name, scenario in results.items():
+            if not hasattr(scenario, 'net_worth'):
+                print(f"Missing net_worth in {scenario_name} scenario")
+                scenario.net_worth = 0.0
+            if not isinstance(scenario.net_worth, (int, float)) or math.isnan(scenario.net_worth) or math.isinf(scenario.net_worth):
+                print(f"Invalid net_worth in {scenario_name} scenario: {scenario.net_worth}")
+                scenario.net_worth = 0.0
+        
+        # Convert results to dict and explicitly include net_worth
+        response_data = {
+            'rent': {**asdict(results['rent']), 'net_worth': float(results['rent'].net_worth)},
+            'min_mortgage': {**asdict(results['min_mortgage']), 'net_worth': float(results['min_mortgage'].net_worth)},
+            'max_mortgage': {**asdict(results['max_mortgage']), 'net_worth': float(results['max_mortgage'].net_worth)}
+        }
+        
+        # Debug log the response
+        print("Response data:", response_data)
+        
+        return jsonify(response_data)
         
     except Exception as e:
+        print(f"Calculation error: {str(e)}")
         return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':

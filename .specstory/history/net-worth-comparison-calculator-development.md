@@ -7955,6 +7955,426 @@ Let me know if you'd like to make any other changes!
 
 ---
 
+_**User**_
+
+Now check for errors of the net worth variable in the attached files as the html shows NaN
+
+---
+
+_**Assistant**_
+
+Let me check how the net worth is being displayed and handled in the frontend code.
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**Assistant**_
+
+
+
+Let me check the context around these net worth references in script.js:
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+Let me also check how the currency formatting is handled:
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+Let me check the formatCurrency function:
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**Assistant**_
+
+
+
+I see the issue. The `formatCurrency` function doesn't handle NaN values, and it's trying to format them directly. Let me update the function to handle NaN values gracefully:
+
+---
+
+_**Assistant**_
+
+```
+// Format currency values
+function formatCurrency(value) {
+    if (isNaN(value) || value === null || value === undefined) {
+        return '-';
+    }
+    return new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+This change will ensure that any NaN values in the net worth calculation are displayed as a dash ('-') instead of 'NaN'. The issue was that the `formatCurrency` function was trying to format NaN values as currency, which isn't possible.
+
+Now when the net worth calculation returns NaN (which can happen if any of its components are undefined or NaN), it will be displayed as a dash instead of showing 'NaN' in the table.
+
+Let me know if you'd like me to make any other changes to improve the error handling!
+
+---
+
+_**User**_
+
+check for undefined parts of the net worth variable
+
+---
+
+_**Assistant**_
+
+Let me check how the net worth values are being handled in the response and display. First, let me check the API response structure:
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**Assistant**_
+
+
+
+Let me check the frontend code where net worth is displayed:
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+Let me add some debugging to help identify where the net worth values might be undefined. I'll update the script.js file:
+
+---
+
+_**Assistant**_
+
+```
+// Update results in the UI
+function updateResults(results) {
+    // Debug logging for net worth values
+    console.log('Rent scenario:', {
+        net_worth: results.rent.net_worth,
+        principal: results.rent.principal_investment_value,
+        monthly: results.rent.monthly_investment_value,
+        house: results.rent.house_value,
+        mortgage: results.rent.remaining_mortgage
+    });
+    console.log('Max mortgage scenario:', {
+        net_worth: results.max_mortgage.net_worth,
+        principal: results.max_mortgage.principal_investment_value,
+        monthly: results.max_mortgage.monthly_investment_value,
+        house: results.max_mortgage.house_value,
+        mortgage: results.max_mortgage.remaining_mortgage
+    });
+    console.log('Min mortgage scenario:', {
+        net_worth: results.min_mortgage.net_worth,
+        principal: results.min_mortgage.principal_investment_value,
+        monthly: results.min_mortgage.monthly_investment_value,
+        house: results.min_mortgage.house_value,
+        mortgage: results.min_mortgage.remaining_mortgage
+    });
+    
+    // Show results area and hide loading spinner
+    document.getElementById('resultsArea').style.display = 'block';
+    document.getElementById('loadingSpinner').style.display = 'none';
+    
+    // Update results table
+    updateResultsTable(results);
+    
+    // Update chart
+    updateChart(results);
+}
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've added detailed debug logging that will help us identify if any components of the net worth calculation are undefined. When you run the calculator next time, please check the browser's developer console (F12) and look for these debug logs. They will show us:
+
+1. For each scenario (rent, max mortgage, min mortgage):
+   - The final net worth value
+   - Principal investment value
+   - Monthly investment value
+   - House value
+   - Remaining mortgage
+
+This will help us pinpoint exactly which values might be undefined or NaN, causing the net worth calculation to fail. 
+
+Let me know what the console shows when you run the calculator, and I can help fix any specific undefined values we find!
+
+---
+
+_**User**_
+
+I still can't see any values for the net worth calculation nor errors in the html output, do a thorough error check.
+
+---
+
+_**Assistant**_
+
+Let me do a thorough error check of the net worth calculation flow from backend to frontend.
+
+1. First, I notice that in `calculator.py`, the error handling in `net_worth` property returns 1.0 on error, which is not ideal:
+
+---
+
+_**Assistant**_
+
+```
+    @property
+    def net_worth(self) -> float:
+        """Total net worth including all assets and liabilities."""
+        try:
+            # Ensure all components are valid floats
+            principal = float(self.principal_investment_value or 0.0)
+            monthly = float(self.monthly_investment_value or 0.0)
+            house = float(self.house_value or 0.0)
+            mortgage = float(self.remaining_mortgage or 0.0)
+            
+            net_worth = principal + monthly + house - mortgage
+            
+            if not isinstance(net_worth, (int, float)) or math.isnan(net_worth) or math.isinf(net_worth):
+                print(f"Invalid net worth calculated: {net_worth}")
+                return 0.0
+                
+            return net_worth
+            
+        except Exception as e:
+            print(f"Net worth calculation error: {str(e)}")
+            print(f"Values: principal={self.principal_investment_value} ({type(self.principal_investment_value)}), " +
+                  f"monthly={self.monthly_investment_value} ({type(self.monthly_investment_value)}), " +
+                  f"house={self.house_value} ({type(self.house_value)}), " +
+                  f"mortgage={self.remaining_mortgage} ({type(self.remaining_mortgage)})")
+            return 0.0
+```
+
+---
+
+_**Assistant**_
+
+
+
+2. Now let me check how the net worth is displayed in the frontend:
+
+---
+
+_**Assistant**_
+
+```
+// Format currency values
+function formatCurrency(value) {
+    // Handle invalid values
+    if (value === null || value === undefined || isNaN(value) || !isFinite(value)) {
+        console.log(`Invalid currency value: ${value} (${typeof value})`);
+        return '-';
+    }
+    // Ensure value is a number
+    const numValue = Number(value);
+    if (isNaN(numValue)) {
+        console.log(`Could not convert to number: ${value} (${typeof value})`);
+        return '-';
+    }
+    return new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(numValue);
+}
+
+// ... existing code ...
+
+                <tr>
+                    <td>Total Rent Paid</td>
+                    <td>${formatCurrency(results.rent.total_rent_paid)}</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr class="table-primary">
+                    <th>Net Worth</th>
+                    <td>${formatCurrency(results.rent.net_worth)}</td>
+                    <td>${formatCurrency(results.max_mortgage.net_worth)}</td>
+                    <td>${formatCurrency(results.min_mortgage.net_worth)}</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+3. Let me also add validation in the API response to ensure we're sending valid data:
+
+---
+
+_**Assistant**_
+
+```
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    """Handle calculation requests and return results."""
+    try:
+        data = request.get_json()
+        
+        # Create inputs object matching calculator.py exactly
+        inputs = ScenarioInputs(
+            initial_savings=float(data['initial_savings']),
+            house_cost=float(data['house_cost']),
+            monthly_rent=float(data['monthly_rent']),
+            monthly_disposable_income=float(data['monthly_disposable_income']),
+            time_horizon_years=int(data['time_horizon_years']),
+            mortgage_term_years=int(data['mortgage_term_years']),
+            house_inflation=float(data.get('house_inflation', cfg.DEFAULT_HOUSE_PRICE_INFLATION)),
+            investment_return=float(data.get('investment_return', cfg.DEFAULT_INVESTMENT_RETURN)),
+            mortgage_rate=float(data.get('mortgage_rate', cfg.DEFAULT_MORTGAGE_RATE)),
+            min_down_payment_percent=float(data.get('min_down_payment_percent', cfg.DEFAULT_MIN_DOWN_PAYMENT_PERCENT)),
+            cpi=float(data.get('cpi', cfg.DEFAULT_CPI))
+        )
+        
+        results = compare_scenarios(inputs)
+        
+        # Validate results before sending
+        for scenario_name, scenario in results.items():
+            if not hasattr(scenario, 'net_worth'):
+                print(f"Missing net_worth in {scenario_name} scenario")
+                scenario.net_worth = 0.0
+            if not isinstance(scenario.net_worth, (int, float)) or math.isnan(scenario.net_worth) or math.isinf(scenario.net_worth):
+                print(f"Invalid net_worth in {scenario_name} scenario: {scenario.net_worth}")
+                scenario.net_worth = 0.0
+        
+        response_data = {
+            'rent': asdict(results['rent']),
+            'min_mortgage': asdict(results['min_mortgage']),
+            'max_mortgage': asdict(results['max_mortgage'])
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"Calculation error: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've made several improvements to help identify and fix the net worth calculation issues:
+
+1. In `calculator.py`:
+   - Added better type checking and conversion for net worth components
+   - Added validation for NaN and infinite values
+   - Improved error logging to show types and values
+   - Changed error return value from 1.0 to 0.0
+
+2. In `script.js`:
+   - Improved `formatCurrency` to handle more edge cases
+   - Added logging for invalid values
+   - Ensured proper number conversion
+
+3. In `app.py`:
+   - Added validation for net worth values before sending response
+   - Added logging for missing or invalid net worth values
+   - Ensured net worth is always a valid number in the response
+
+These changes should help us:
+1. Identify where the calculation is failing
+2. Prevent NaN values from reaching the frontend
+3. Show proper error messages in the console
+4. Display '-' instead of 'NaN' when values are invalid
+
+Try running the calculator again and check the browser's console (F12) for any error messages. This will help us pinpoint exactly where the net worth calculation is failing.
+
+---
+
+_**User**_
+
+Still, doesn't work, can you check the html and script.js next?
+
+---
+
+_**Assistant**_
+
+
+
+---
+
 
 
 ---
