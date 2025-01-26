@@ -173,6 +173,26 @@ function updateResultsTable(results) {
                     <td>${formatCurrency(-results.max_mortgage.remaining_mortgage)}</td>
                     <td>${formatCurrency(-results.min_mortgage.remaining_mortgage)}</td>
                 </tr>
+                <tr class="table-primary">
+                    <th>Net Worth</th>
+                    <td>${formatCurrency(results.rent.net_worth)}</td>
+                    <td>${formatCurrency(results.max_mortgage.net_worth)}</td>
+                    <td>${formatCurrency(results.min_mortgage.net_worth)}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h4 class="mt-4">Additional Information</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Rent + Invest</th>
+                    <th>Max Mortgage</th>
+                    <th>Min Mortgage</th>
+                </tr>
+            </thead>
+            <tbody>
                 <tr>
                     <td>Total Interest Paid</td>
                     <td>-</td>
@@ -184,12 +204,6 @@ function updateResultsTable(results) {
                     <td>${formatCurrency(results.rent.total_rent_paid)}</td>
                     <td>-</td>
                     <td>-</td>
-                </tr>
-                <tr class="table-primary">
-                    <th>Net Worth</th>
-                    <td>${formatCurrency(results.rent.net_worth)}</td>
-                    <td>${formatCurrency(results.max_mortgage.net_worth)}</td>
-                    <td>${formatCurrency(results.min_mortgage.net_worth)}</td>
                 </tr>
             </tbody>
         </table>

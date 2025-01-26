@@ -8371,7 +8371,227 @@ Still, doesn't work, can you check the html and script.js next?
 
 _**Assistant**_
 
+Let me check the HTML template and script.js for any issues with the net worth display.
 
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**Assistant**_
+
+
+
+I notice that the net worth row is in the table but might not be getting the values correctly. Let me check how the results are being processed:
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+Let me check how the results are being handled in the API response:
+
+---
+
+_**Assistant**_
+
+```
+        results = compare_scenarios(inputs)
+        
+        # Validate results before sending
+        for scenario_name, scenario in results.items():
+            if not hasattr(scenario, 'net_worth'):
+                print(f"Missing net_worth in {scenario_name} scenario")
+                scenario.net_worth = 0.0
+            if not isinstance(scenario.net_worth, (int, float)) or math.isnan(scenario.net_worth) or math.isinf(scenario.net_worth):
+                print(f"Invalid net_worth in {scenario_name} scenario: {scenario.net_worth}")
+                scenario.net_worth = 0.0
+        
+        # Convert results to dict and explicitly include net_worth
+        response_data = {
+            'rent': {**asdict(results['rent']), 'net_worth': float(results['rent'].net_worth)},
+            'min_mortgage': {**asdict(results['min_mortgage']), 'net_worth': float(results['min_mortgage'].net_worth)},
+            'max_mortgage': {**asdict(results['max_mortgage']), 'net_worth': float(results['max_mortgage'].net_worth)}
+        }
+        
+        # Debug log the response
+        print("Response data:", response_data)
+        
+        return jsonify(response_data)
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+Now let me update the frontend to properly handle and display the net worth values:
+
+---
+
+_**Assistant**_
+
+```
+// Update results in the UI
+function updateResults(results) {
+    // Debug logging for net worth values
+    console.log('Rent scenario:', {
+        net_worth: results.rent.net_worth,
+        principal: results.rent.principal_investment_value,
+        monthly: results.rent.monthly_investment_value,
+        house: results.rent.house_value,
+        mortgage: results.rent.remaining_mortgage
+    });
+    console.log('Max mortgage scenario:', {
+        net_worth: results.max_mortgage.net_worth,
+        principal: results.max_mortgage.principal_investment_value,
+        monthly: results.max_mortgage.monthly_investment_value,
+        house: results.max_mortgage.house_value,
+        mortgage: results.max_mortgage.remaining_mortgage
+    });
+    console.log('Min mortgage scenario:', {
+        net_worth: results.min_mortgage.net_worth,
+        principal: results.min_mortgage.principal_investment_value,
+        monthly: results.min_mortgage.monthly_investment_value,
+        house: results.min_mortgage.house_value,
+        mortgage: results.min_mortgage.remaining_mortgage
+    });
+    
+    // Ensure net worth values are numbers
+    results.rent.net_worth = Number(results.rent.net_worth || 0);
+    results.max_mortgage.net_worth = Number(results.max_mortgage.net_worth || 0);
+    results.min_mortgage.net_worth = Number(results.min_mortgage.net_worth || 0);
+    
+    // Show results area and hide loading spinner
+    document.getElementById('resultsArea').style.display = 'block';
+    document.getElementById('loadingSpinner').style.display = 'none';
+    
+    // Update results table
+    updateResultsTable(results);
+    
+    // Update chart
+    updateChart(results);
+}
+
+// Create the results table
+function updateResultsTable(results) {
+    const tableHtml = `
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Rent + Invest</th>
+                    <th>Max Mortgage</th>
+                    <th>Min Mortgage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Initial Investment Growth</td>
+                    <td>${formatCurrency(results.rent.principal_investment_value)}</td>
+                    <td>${formatCurrency(results.max_mortgage.principal_investment_value)}</td>
+                    <td>${formatCurrency(results.min_mortgage.principal_investment_value)}</td>
+                </tr>
+                <tr>
+                    <td>Monthly Savings Growth</td>
+                    <td>${formatCurrency(results.rent.monthly_investment_value)}</td>
+                    <td>${formatCurrency(results.max_mortgage.monthly_investment_value)}</td>
+                    <td>${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
+                </tr>
+                <tr>
+                    <td>House Value</td>
+                    <td>-</td>
+                    <td>${formatCurrency(results.max_mortgage.house_value)}</td>
+                    <td>${formatCurrency(results.min_mortgage.house_value)}</td>
+                </tr>
+                <tr>
+                    <td>Remaining Mortgage</td>
+                    <td>-</td>
+                    <td>${formatCurrency(-results.max_mortgage.remaining_mortgage)}</td>
+                    <td>${formatCurrency(-results.min_mortgage.remaining_mortgage)}</td>
+                </tr>
+                <tr>
+                    <td>Total Interest Paid</td>
+                    <td>-</td>
+                    <td>${formatCurrency(results.max_mortgage.total_interest_paid)}</td>
+                    <td>${formatCurrency(results.min_mortgage.total_interest_paid)}</td>
+                </tr>
+                <tr>
+                    <td>Total Rent Paid</td>
+                    <td>${formatCurrency(results.rent.total_rent_paid)}</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                <tr class="table-primary">
+                    <th>Net Worth</th>
+                    <td>${formatCurrency(results.rent.net_worth)}</td>
+                    <td>${formatCurrency(results.max_mortgage.net_worth)}</td>
+                    <td>${formatCurrency(results.min_mortgage.net_worth)}</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've made several changes to fix the net worth display:
+
+1. In `app.py`:
+   - Explicitly included net_worth in the response data
+   - Added debug logging for the response
+   - Ensured net_worth is converted to float
+
+2. In `script.js`:
+   - Added explicit number conversion for net worth values
+   - Fixed the display of remaining mortgage (showing as negative)
+   - Added more detailed debug logging
+
+3. The key changes are:
+   - Making sure net_worth is explicitly included in the API response
+   - Converting values to numbers before display
+   - Proper handling of negative values for remaining mortgage
+   - Better error logging throughout
+
+Try running the calculator again. You should now see:
+1. Net worth values properly displayed
+2. Detailed error messages in the browser console if anything goes wrong
+3. Proper handling of negative values
+
+Let me know if you still see any issues!
+
+---
+
+_**User**_
+
+In the html, move the total rent paid & total interest to a separate section below the net worth calculation as it is not part of the net worth calculation but for extra context.
 
 ---
 
