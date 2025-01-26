@@ -5878,8 +5878,216 @@ Let me fix these issues:
 _**Assistant**_
 
 ```
-undefined
+                            <div class="mb-3">
+                                <label for="monthly_disposable_income">Monthly Disposable Income (€)</label>
+                                <input type="number" class="form-control" id="monthly_disposable_income" value="{{ config.DEFAULT_MONTHLY_DISPOSABLE }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="min_down_payment_percent">Minimum Down Payment (%)</label>
+                                <input type="number" 
+                                       class="form-control"
+                                       id="min_down_payment_percent" 
+                                       value="10" 
+                                       min="0" 
+                                       max="100" 
+                                       step="1" 
+                                       required>
+                                <small class="form-text text-muted">Percentage of house price required as minimum down payment</small>
+                            </div>
+                            
+                            <div class="accordion mb-3" id="advancedOptions">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advancedPanel">
+                                            Advanced Options
+                                        </button>
+                                    </h2>
+                                    <div id="advancedPanel" class="accordion-collapse collapse">
+                                        <div class="accordion-body">
+                                            <div class="mb-3">
+                                                <label for="time_horizon_years" class="form-label">Time Horizon (Years)</label>
+                                                <input type="number" class="form-control" id="time_horizon_years" value="{{ config.DEFAULT_TIME_HORIZON_YEARS }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="mortgage_term_years" class="form-label">Mortgage Term (Years)</label>
+                                                <input type="number" class="form-control" id="mortgage_term_years" value="{{ config.DEFAULT_MORTGAGE_TERM_YEARS }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="rent_inflation" class="form-label">Rent Inflation Rate (%)</label>
+                                                <input type="number" class="form-control" id="rent_inflation" value="{{ config.DEFAULT_RENT_INFLATION * 100 }}" step="0.1">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="house_inflation" class="form-label">House Price Inflation Rate (%)</label>
+                                                <input type="number" class="form-control" id="house_inflation" value="{{ config.DEFAULT_HOUSE_PRICE_INFLATION * 100 }}" step="0.1">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="investment_return" class="form-label">Investment Return Rate (%)</label>
+                                                <input type="number" class="form-control" id="investment_return" value="{{ config.DEFAULT_INVESTMENT_RETURN * 100 }}" step="0.1">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="mortgage_rate" class="form-label">Mortgage Interest Rate (%)</label>
+                                                <input type="number" class="form-control" id="mortgage_rate" value="{{ config.DEFAULT_MORTGAGE_RATE * 100 }}" step="0.1">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="cpi" class="form-label">Consumer Price Inflation (%)</label>
+                                                <input type="number" class="form-control" id="cpi" value="{{ config.DEFAULT_CPI * 100 }}" step="0.1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 ```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+Now let's fix the JavaScript code:
+
+---
+
+_**Assistant**_
+
+```
+// Get form data
+function getFormData() {
+    const formData = {
+        initial_savings: parseFloat(document.getElementById('initial_savings').value),
+        house_cost: parseFloat(document.getElementById('house_cost').value),
+        monthly_rent: parseFloat(document.getElementById('monthly_rent').value),
+        monthly_disposable_income: parseFloat(document.getElementById('monthly_disposable_income').value),
+        time_horizon_years: parseInt(document.getElementById('time_horizon_years').value),
+        mortgage_term_years: parseInt(document.getElementById('mortgage_term_years').value),
+        min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100,  // Convert from percentage
+        rent_inflation: parseFloat(document.getElementById('rent_inflation').value) / 100,  // Convert from percentage
+        house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,  // Convert from percentage
+        investment_return: parseFloat(document.getElementById('investment_return').value) / 100,  // Convert from percentage
+        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,  // Convert from percentage
+        cpi: parseFloat(document.getElementById('cpi').value) / 100  // Convert from percentage
+    };
+    return formData;
+}
+
+// Update results in the UI
+function updateResults(results) {
+    // Show results area and hide loading spinner
+    document.getElementById('resultsArea').style.display = 'block';
+    document.getElementById('loadingSpinner').style.display = 'none';
+    
+    // Update results table
+    updateResultsTable(results);
+    
+    // Update chart
+    updateChart(results);
+}
+
+// Handle form submission
+document.getElementById('calculatorForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Show loading spinner and hide results
+    document.getElementById('loadingSpinner').style.display = 'block';
+    document.getElementById('resultsArea').style.display = 'none';
+    
+    try {
+        // Get form data
+        const formData = getFormData();
+        
+        // Send calculation request
+        const response = await fetch('/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const results = await response.json();
+        if (results.error) {
+            alert('Calculation error: ' + results.error);
+            document.getElementById('loadingSpinner').style.display = 'none';
+            return;
+        }
+
+        // Update UI with results
+        updateResults(results);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while calculating results. Please check the console for details.');
+        document.getElementById('loadingSpinner').style.display = 'none';
+    }
+});
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've made several important fixes:
+
+1. Fixed form field IDs in HTML:
+   - Changed `monthly_disposable` to `monthly_disposable_income`
+   - Changed `time_horizon` to `time_horizon_years`
+   - Changed `mortgage_term` to `mortgage_term_years`
+   - Changed `min_down_payment` to `min_down_payment_percent`
+   - Added missing `cpi` field
+
+2. Improved JavaScript form data handling:
+   - Removed fallback values (using HTML defaults instead)
+   - Added proper conversion of percentage values to decimals
+   - Added proper type conversion for all fields
+
+3. Improved error handling and UI feedback:
+   - Added loading spinner during calculations
+   - Better error messages
+   - Proper hiding/showing of UI elements
+   - Removed references to non-existent elements
+
+4. Added proper percentage handling:
+   - Form shows percentages (e.g., 2.0%)
+   - JavaScript converts to decimals (e.g., 0.02)
+   - All rate inputs use step="0.1" for precision
+
+The calculator should now work correctly. When you click the calculate button:
+1. The form data will be properly collected
+2. A loading spinner will show during calculation
+3. Results will display in both chart and table form
+4. Any errors will be clearly shown
+
+Try using the calculator again. If you still have issues, please let me know what specific behavior you're seeing!
+
+---
+
+_**User**_
+
+Ok, now remove 'rent inflation rate' as an input, as a constant and replace it with consumer price inflation in all instances
+
+---
+
+_**Assistant**_
+
+I'll remove rent inflation and use CPI instead across all files. Let me make these changes:
+
+1. First, update `config.py` to remove the rent inflation constant:
+
+---
+
+_**Assistant**_
+
+
 
 ---
 

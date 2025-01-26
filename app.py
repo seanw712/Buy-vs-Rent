@@ -28,7 +28,6 @@ def calculate():
             monthly_disposable_income=float(data['monthly_disposable_income']),
             time_horizon_years=int(data['time_horizon_years']),
             mortgage_term_years=int(data['mortgage_term_years']),
-            rent_inflation=float(data.get('rent_inflation', cfg.DEFAULT_RENT_INFLATION)),
             house_inflation=float(data.get('house_inflation', cfg.DEFAULT_HOUSE_PRICE_INFLATION)),
             investment_return=float(data.get('investment_return', cfg.DEFAULT_INVESTMENT_RETURN)),
             mortgage_rate=float(data.get('mortgage_rate', cfg.DEFAULT_MORTGAGE_RATE)),

@@ -3,9 +3,8 @@ Configuration file containing default economic variables and constants.
 """
 
 # Economic Variables (annual rates)
-DEFAULT_RENT_INFLATION = 0.02  # 2% annual rent increase
+DEFAULT_CPI = 0.02  # 2% consumer price inflation (used for rent and income growth)
 DEFAULT_HOUSE_PRICE_INFLATION = 0.04  # 4% annual house price appreciation
-DEFAULT_CPI = 0.02  # 2% consumer price inflation
 DEFAULT_INVESTMENT_RETURN = 0.085  # 8.5% annual investment return (after tax)
 DEFAULT_MORTGAGE_RATE = 0.02  # 2% mortgage interest rate
 

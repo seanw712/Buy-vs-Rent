@@ -65,10 +65,6 @@
                                                 <input type="number" class="form-control" id="mortgage_term_years" value="{{ config.DEFAULT_MORTGAGE_TERM_YEARS }}">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="rent_inflation" class="form-label">Rent Inflation Rate (%)</label>
-                                                <input type="number" class="form-control" id="rent_inflation" value="{{ config.DEFAULT_RENT_INFLATION * 100 }}" step="0.1">
-                                            </div>
-                                            <div class="mb-3">
                                                 <label for="house_inflation" class="form-label">House Price Inflation Rate (%)</label>
                                                 <input type="number" class="form-control" id="house_inflation" value="{{ config.DEFAULT_HOUSE_PRICE_INFLATION * 100 }}" step="0.1">
                                             </div>
@@ -83,6 +79,7 @@
                                             <div class="mb-3">
                                                 <label for="cpi" class="form-label">Consumer Price Inflation (%)</label>
                                                 <input type="number" class="form-control" id="cpi" value="{{ config.DEFAULT_CPI * 100 }}" step="0.1">
+                                                <small class="form-text text-muted">Used for both income and rent growth</small>
                                             </div>
                                         </div>
                                     </div>

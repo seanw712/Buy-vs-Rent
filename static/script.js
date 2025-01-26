@@ -203,7 +203,6 @@ function getFormData() {
         time_horizon_years: parseInt(document.getElementById('time_horizon_years').value),
         mortgage_term_years: parseInt(document.getElementById('mortgage_term_years').value),
         min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100,  // Convert from percentage
-        rent_inflation: parseFloat(document.getElementById('rent_inflation').value) / 100,  // Convert from percentage
         house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,  // Convert from percentage
         investment_return: parseFloat(document.getElementById('investment_return').value) / 100,  // Convert from percentage
         mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,  // Convert from percentage

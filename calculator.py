@@ -12,12 +12,11 @@ class ScenarioInputs:
     monthly_disposable_income: float
     time_horizon_years: int
     mortgage_term_years: int
-    rent_inflation: float = cfg.DEFAULT_RENT_INFLATION
     house_inflation: float = cfg.DEFAULT_HOUSE_PRICE_INFLATION
     investment_return: float = cfg.DEFAULT_INVESTMENT_RETURN
     mortgage_rate: float = cfg.DEFAULT_MORTGAGE_RATE
     min_down_payment_percent: float = cfg.DEFAULT_MIN_DOWN_PAYMENT_PERCENT
-    cpi: float = cfg.DEFAULT_CPI  # Consumer Price Index for income growth
+    cpi: float = cfg.DEFAULT_CPI  # Consumer Price Index for income and rent growth
 
     def validate(self):
         """
@@ -37,7 +36,7 @@ class ScenarioInputs:
             raise ValueError("Disposable income cannot be negative.")
         
         # Validate economic variables
-        if self.rent_inflation < 0 or self.house_inflation < 0 or self.cpi < 0:
+        if self.house_inflation < 0 or self.cpi < 0:
             raise ValueError("Inflation rates cannot be negative.")
         if self.investment_return < 0:
             raise ValueError("Investment return cannot be negative.")
@@ -45,7 +44,7 @@ class ScenarioInputs:
             raise ValueError("Mortgage rate cannot be negative.")
         
         # Additional validation for realistic values
-        if self.rent_inflation > 0.2 or self.house_inflation > 0.2 or self.cpi > 0.2:
+        if self.house_inflation > 0.2 or self.cpi > 0.2:
             raise ValueError("Inflation rates are unrealistically high.")
         if self.investment_return > 0.2:
             raise ValueError("Investment return is unrealistically high.")
@@ -315,7 +314,7 @@ def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
             years=inputs.time_horizon_years,
             investment_return=inputs.investment_return,
             cpi=inputs.cpi,
-            housing_cost_inflation=inputs.rent_inflation
+            housing_cost_inflation=inputs.cpi  # Use CPI for rent growth
         )
         
         # Calculate total rent paid with inflation
@@ -323,7 +322,7 @@ def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
         monthly_rent = inputs.monthly_rent
         for year in range(inputs.time_horizon_years):
             total_rent += monthly_rent * 12
-            monthly_rent *= (1 + inputs.rent_inflation)
+            monthly_rent *= (1 + inputs.cpi)  # Use CPI for rent growth
         
         # Split total investment between principal and monthly for consistent reporting
         monthly_investment_ratio = 0.7  # Approximate ratio based on typical scenario
