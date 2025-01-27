@@ -11149,6 +11149,155 @@ I'll move the mortgage term to advanced options and add explanatory text under i
 
 ---
 
+_**Assistant**_
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House vs Stocks Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <style>
+        body {
+            zoom: 0.8;
+            -moz-transform: scale(0.8);
+            -moz-transform-origin: 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">House vs Stocks Calculator</h1>
+        
+        <div class="main-content">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h5>Input Parameters</h5>
+                <form id="calculatorForm">
+                    <div class="form-group">
+                        <label for="initial_savings">Initial Savings (€)</label>
+                        <small class="form-text text-muted d-block mb-2">Your current total savings that you are comfortable investing (house or investments)</small>
+                        <input type="number" class="form-control" id="initial_savings" value="{{ config.DEFAULT_INITIAL_SAVINGS }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="house_cost">House Cost (€)</label>
+                        <small class="form-text text-muted d-block mb-2">Your share of the house price if shared.</small>
+                        <input type="number" class="form-control" id="house_cost" value="{{ config.DEFAULT_HOUSE_COST }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="monthly_rent">Rent/Month (€)</label>
+                        <input type="number" class="form-control" id="monthly_rent" value="{{ config.DEFAULT_MONTHLY_RENT }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="monthly_disposable_income">Disposable Income/Month (€)</label>
+                        <small class="form-text text-muted d-block mb-2">Income after food & expenses, left for housing & saving.</small>
+                        <input type="number" class="form-control" id="monthly_disposable_income" value="{{ config.DEFAULT_MONTHLY_DISPOSABLE }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time_horizon_years">Time Horizon (Years)</label>
+                        <input type="number" class="form-control" id="time_horizon_years" value="{{ config.DEFAULT_TIME_HORIZON_YEARS }}">
+                    </div>
+                    
+                    <div class="accordion mb-3" id="advancedOptions">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#advancedPanel">
+                                    Advanced Options
+                                </button>
+                            </h2>
+                            <div id="advancedPanel" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    <div class="form-group">
+                                        <label for="mortgage_term_years">Mortgage Term (Years)</label>
+                                        <input type="number" class="form-control" id="mortgage_term_years" value="{{ config.DEFAULT_MORTGAGE_TERM_YEARS }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="min_down_payment_percent">Minimum Down Payment (%)</label>
+                                        <input type="number" class="form-control" id="min_down_payment_percent" value="15" min="0" max="100" step="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="house_inflation">House Price Inflation Rate (%)</label>
+                                        <input type="number" class="form-control" id="house_inflation" value="{{ config.DEFAULT_HOUSE_PRICE_INFLATION * 100 }}" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="investment_return">Investment Return Rate (%)</label>
+                                        <input type="number" class="form-control" id="investment_return" value="{{ config.DEFAULT_INVESTMENT_RETURN * 100 }}" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mortgage_rate">Mortgage Interest Rate (%)</label>
+                                        <input type="number" class="form-control" id="mortgage_rate" value="{{ config.DEFAULT_MORTGAGE_RATE * 100 }}" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cpi">Consumer Price Inflation (%)</label>
+                                        <input type="number" class="form-control" id="cpi" value="{{ config.DEFAULT_CPI * 100 }}" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Calculate</button>
+                </form>
+            </div>
+            
+            <!-- Results Section -->
+            // ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've made the following changes:
+
+1. Added explanatory text under Initial Savings:
+   - Added "Your current total savings that you are comfortable investing (house or investments)"
+   - Used the same styling as other explanatory text with `d-block` and `mb-2` classes
+
+2. Moved Mortgage Term:
+   - Removed it from the main input parameters section
+   - Added it to the advanced options section at the top
+   - Kept all its properties and default value
+
+The form should now be more intuitive with the additional explanation for initial savings, and the mortgage term is now properly grouped with other advanced parameters. Let me know if you'd like any adjustments to the text or organization!
+
+---
+
+_**User**_
+
+On the right hand side, name the equivalent of Input Parameters "Results". Ensure a bit more spacing for the bottom container with additional information.
+
+---
+
+_**Assistant**_
+
+I'll update the right-hand side title and adjust the spacing.
+
+---
+
+_**Assistant**_
+
+```
+undefined
+```
+
+---
+
+_**Assistant**_
+
+
+
+---
+
 
 
 ---
