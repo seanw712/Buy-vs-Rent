@@ -261,17 +261,67 @@ function updateResults(results) {
         mortgage: results.min_mortgage.remaining_mortgage
     });
     
-    // Ensure net worth values are numbers
-    results.rent.net_worth = Number(results.rent.net_worth || 0);
-    results.max_mortgage.net_worth = Number(results.max_mortgage.net_worth || 0);
-    results.min_mortgage.net_worth = Number(results.min_mortgage.net_worth || 0);
-    
     // Show results area and hide loading spinner
     document.getElementById('resultsArea').style.display = 'block';
     document.getElementById('loadingSpinner').style.display = 'none';
     
-    // Update results table
-    updateResultsTable(results);
+    // Update Net Worth Summary Table
+    const netWorthTable = document.querySelector('.net-worth-summary .table tbody');
+    netWorthTable.innerHTML = `
+        <tr>
+            <td>Initial Investment Growth</td>
+            <td class="text-end">${formatCurrency(results.rent.principal_investment_value)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.principal_investment_value)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.principal_investment_value)}</td>
+        </tr>
+        <tr>
+            <td>Monthly Savings Growth</td>
+            <td class="text-end">${formatCurrency(results.rent.monthly_investment_value)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.monthly_investment_value)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
+        </tr>
+        <tr>
+            <td>House Value</td>
+            <td class="text-end">-</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.house_value)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.house_value)}</td>
+        </tr>
+        <tr>
+            <td>Remaining Mortgage</td>
+            <td class="text-end">-</td>
+            <td class="text-end">${formatCurrency(-results.max_mortgage.remaining_mortgage)}</td>
+            <td class="text-end">${formatCurrency(-results.min_mortgage.remaining_mortgage)}</td>
+        </tr>
+        <tr class="table-primary">
+            <th>Net Worth</th>
+            <td class="text-end">${formatCurrency(results.rent.net_worth)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.net_worth)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.net_worth)}</td>
+        </tr>
+    `;
+    
+    // Update Additional Information Table
+    const additionalInfoTable = document.querySelector('.additional-info .table tbody');
+    additionalInfoTable.innerHTML = `
+        <tr>
+            <td>Total Interest Paid</td>
+            <td class="text-end">-</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.total_interest_paid)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.total_interest_paid)}</td>
+        </tr>
+        <tr>
+            <td>Total Rent Paid</td>
+            <td class="text-end">${formatCurrency(results.rent.total_rent_paid)}</td>
+            <td class="text-end">-</td>
+            <td class="text-end">-</td>
+        </tr>
+        <tr>
+            <td>Average Monthly Housing Cost</td>
+            <td class="text-end">${formatCurrency(results.rent.total_rent_paid / (getFormData().time_horizon_years * 12))}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.monthly_mortgage_max)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.monthly_mortgage_min)}</td>
+        </tr>
+    `;
     
     // Update chart
     updateChart(results);
