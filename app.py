@@ -29,6 +29,7 @@ def calculate():
             monthly_savings_capacity=float(data['monthly_savings_capacity']),
             time_horizon_years=int(data['time_horizon_years']),
             mortgage_term_years=int(data['mortgage_term_years']),
+            purchase_costs=float(data.get('house_purchase_fees_percent', cfg.DEFAULT_HOUSE_PURCHASE_FEES_PERCENT)),
             house_inflation=float(data.get('house_inflation', cfg.DEFAULT_HOUSE_PRICE_INFLATION)),
             investment_return=float(data.get('investment_return', cfg.DEFAULT_INVESTMENT_RETURN)),
             mortgage_rate=float(data.get('mortgage_rate', cfg.DEFAULT_MORTGAGE_RATE)),

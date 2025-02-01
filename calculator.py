@@ -309,7 +309,7 @@ def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
 def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> ScenarioResults:
     """Calculate results for buying scenario."""
     # Calculate total purchase cost including fees
-    total_house_cost = inputs.house_cost * (1 + cfg.DEFAULT_HOUSE_PURCHASE_FEES_PERCENT)
+    total_house_cost = inputs.house_cost * (1 + inputs.purchase_costs)
     
     # Calculate mortgage amounts for both scenarios
     max_mortgage_amount = total_house_cost * (1 - inputs.min_down_payment_percent)
