@@ -10,14 +10,19 @@ class ScenarioInputs:
     initial_savings: float
     house_cost: float
     monthly_rent: float
-    monthly_disposable_income: float
-    time_horizon_years: int
-    mortgage_term_years: int
+    monthly_savings_capacity: float
+    purchase_costs: float = cfg.DEFAULT_HOUSE_PURCHASE_FEES_PERCENT
+    time_horizon_years: int = cfg.DEFAULT_TIME_HORIZON_YEARS
+    mortgage_term_years: int = cfg.DEFAULT_MORTGAGE_TERM_YEARS
     house_inflation: float = cfg.DEFAULT_HOUSE_PRICE_INFLATION
     investment_return: float = cfg.DEFAULT_INVESTMENT_RETURN
     mortgage_rate: float = cfg.DEFAULT_MORTGAGE_RATE
     min_down_payment_percent: float = cfg.DEFAULT_MIN_DOWN_PAYMENT_PERCENT
     cpi: float = cfg.DEFAULT_CPI  # Consumer Price Index for income and rent growth
+
+    @property
+    def monthly_disposable_income(self) -> float:
+        return self.monthly_savings_capacity + self.monthly_rent
 
     def validate(self):
         """
@@ -30,7 +35,7 @@ class ScenarioInputs:
         self.initial_savings = float(self.initial_savings)
         self.house_cost = float(self.house_cost)
         self.monthly_rent = float(self.monthly_rent)
-        self.monthly_disposable_income = float(self.monthly_disposable_income)
+        self.monthly_savings_capacity = float(self.monthly_savings_capacity)
         self.time_horizon_years = int(self.time_horizon_years)
         self.mortgage_term_years = int(self.mortgage_term_years)
         self.house_inflation = float(self.house_inflation)
@@ -82,7 +87,7 @@ class ScenarioInputs:
             raise ValueError("Down payment percentage must be between 0 and 1.")
         
         # Validate mortgage feasibility
-        total_house_cost = self.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT)
+        total_house_cost = self.house_cost * (1 + self.purchase_costs)
         min_down_payment = total_house_cost * self.min_down_payment_percent
         if min_down_payment > self.initial_savings:
             raise ValueError("Initial savings insufficient for minimum down payment.")
@@ -304,7 +309,7 @@ def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
 def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> ScenarioResults:
     """Calculate results for buying scenario."""
     # Calculate total purchase cost including fees
-    total_house_cost = inputs.house_cost * (1 + cfg.HOUSE_PURCHASE_FEES_PERCENT)
+    total_house_cost = inputs.house_cost * (1 + cfg.DEFAULT_HOUSE_PURCHASE_FEES_PERCENT)
     
     # Calculate mortgage amounts for both scenarios
     max_mortgage_amount = total_house_cost * (1 - inputs.min_down_payment_percent)

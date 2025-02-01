@@ -26,7 +26,7 @@ def calculate():
             initial_savings=float(data['initial_savings']),
             house_cost=float(data['house_cost']),
             monthly_rent=float(data['monthly_rent']),
-            monthly_disposable_income=float(data['monthly_disposable_income']),
+            monthly_savings_capacity=float(data['monthly_savings_capacity']),
             time_horizon_years=int(data['time_horizon_years']),
             mortgage_term_years=int(data['mortgage_term_years']),
             house_inflation=float(data.get('house_inflation', cfg.DEFAULT_HOUSE_PRICE_INFLATION)),

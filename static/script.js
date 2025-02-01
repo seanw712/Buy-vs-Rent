@@ -224,7 +224,7 @@ function getFormData() {
         initial_savings: parseFloat(document.getElementById('initial_savings').value),
         house_cost: parseFloat(document.getElementById('house_cost').value),
         monthly_rent: parseFloat(document.getElementById('monthly_rent').value),
-        monthly_disposable_income: parseFloat(document.getElementById('monthly_disposable_income').value),
+        monthly_savings_capacity: parseFloat(document.getElementById('monthly_savings_capacity').value),
         time_horizon_years: parseInt(document.getElementById('time_horizon_years').value),
         mortgage_term_years: parseInt(document.getElementById('mortgage_term_years').value),
         min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100,  // Convert from percentage

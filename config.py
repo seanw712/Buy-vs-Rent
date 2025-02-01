@@ -14,8 +14,8 @@ DEFAULT_HOUSE_COST = 200000  # €200,000 house price
 DEFAULT_MONTHLY_RENT = 650  # €650 monthly rent
 DEFAULT_MONTHLY_MORTGAGE_MAX = 712  # €712 monthly mortgage (max mortgage scenario)
 DEFAULT_MONTHLY_MORTGAGE_MIN = 1221  # €1,221 monthly mortgage (min mortgage scenario)
-DEFAULT_MONTHLY_DISPOSABLE = 1500  # €1,500 monthly disposable income
-DEFAULT_TIME_HORIZON_YEARS = 32  # 32 years time horizon
+DEFAULT_MONTHLY_SAVINGS_CAPACITY = 700  # €700 monthly savings capacity
+DEFAULT_TIME_HORIZON_YEARS = 30  # 30 years time horizon
 DEFAULT_MORTGAGE_TERM_YEARS = 25  # 25 years mortgage term
 DEFAULT_MIN_DOWN_PAYMENT_PERCENT = 0.15  # 15% minimum down payment
 
@@ -24,7 +24,7 @@ MIN_DOWN_PAYMENT_PERCENT = 0.15  # 15% minimum down payment
 MAX_DOWN_PAYMENT_PERCENT = 0.90  # 90% maximum down payment
 
 # Transaction Costs
-HOUSE_PURCHASE_FEES_PERCENT = 0.06  # 6% of house price for closing costs, fees, etc.
+DEFAULT_HOUSE_PURCHASE_FEES_PERCENT = 0.07  # 7% of house price for closing costs, fees, etc.
 
 # Time Constants
 MONTHS_PER_YEAR = 12 

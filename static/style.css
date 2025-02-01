@@ -17,6 +17,7 @@ html, body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    min-height: 100vh;
 }
 
 body {
@@ -29,6 +30,7 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: center;
+    min-height: 100vh;
 }
 
 .container {
@@ -288,4 +290,16 @@ label {
 [data-tooltip]:hover:before {
     opacity: 1;
     visibility: visible;
+}
+
+/* Add a wrapper div in your HTML around the container */
+.page-wrapper {
+    width: 100%;
+    transform: scale(0.8);
+    transform-origin: 0 0;
+    -webkit-transform: scale(0.8);
+    -webkit-transform-origin: 0 0;
+    -moz-transform: scale(0.8);
+    -moz-transform-origin: 0 0;
+    padding-bottom: 25%; /* Compensate for the scale */
 } 
