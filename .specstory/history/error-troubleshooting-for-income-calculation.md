@@ -1909,6 +1909,374 @@ Put each of the components in bold for both tables, and remove the 'Components' 
 
 _**Assistant**_
 
+I'll help you modify the tables to make the components bold and remove the 'Components' header. I'll need to update both the HTML template and the JavaScript file since the tables are populated dynamically.
+
+First, I'll update the HTML template:
+
+---
+
+_**Assistant**_
+
+```
+// ... existing code ...
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Rent + Invest</th>
+                                            <th>Max Mortgage</th>
+                                            <th>Min Mortgage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Growth of Initial Savings</strong></td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Growth of Monthly Savings</strong></td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>House Value</strong></td>
+                                            <td class="text-end">-</td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                        </tr>
+                                        <tr class="table-primary">
+                                            <th><strong>Net Worth</strong></th>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                        </tr>
+                                    </tbody>
+// ... existing code ...
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Rent + Invest</th>
+                                            <th>Max Mortgage</th>
+                                            <th>Min Mortgage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Total Interest + Purchase Costs</strong></td>
+                                            <td class="text-end">-</td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Total Rent Paid</strong></td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end">-</td>
+                                            <td class="text-end">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Average Monthly Housing Cost</strong></td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                            <td class="text-end"></td>
+                                        </tr>
+                                    </tbody>
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+Now I'll update the JavaScript file to ensure any dynamically generated table content also has bold components:
+
+---
+
+_**Assistant**_
+
+```
+// ... existing code ...
+    netWorthTable.innerHTML = `
+        <thead>
+            <tr>
+                <th></th>
+                <th>Rent + Invest</th>
+                <th>Max Mortgage</th>
+                <th>Min Mortgage</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Growth of Initial Savings</strong></td>
+                <td class="text-end">${formatCurrency(results.rent_scenario.initial_savings_growth)}</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage_scenario.initial_savings_growth)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage_scenario.initial_savings_growth)}</td>
+            </tr>
+            <tr>
+                <td><strong>Growth of Monthly Savings</strong></td>
+                <td class="text-end">${formatCurrency(results.rent_scenario.monthly_savings_growth)}</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage_scenario.monthly_savings_growth)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage_scenario.monthly_savings_growth)}</td>
+            </tr>
+            <tr>
+                <td><strong>House Value</strong></td>
+                <td class="text-end">-</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage_scenario.house_value)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage_scenario.house_value)}</td>
+            </tr>
+            <tr class="table-primary">
+                <th><strong>Net Worth</strong></th>
+                <td class="text-end">${formatCurrency(results.rent_scenario.net_worth)}</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage_scenario.net_worth)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage_scenario.net_worth)}</td>
+            </tr>
+        </tbody>
+    `;
+
+    additionalInfoTable.innerHTML = `
+        <thead>
+            <tr>
+                <th></th>
+                <th>Rent + Invest</th>
+                <th>Max Mortgage</th>
+                <th>Min Mortgage</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Total Interest + Purchase Costs</strong></td>
+                <td class="text-end">-</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage_scenario.total_purchase_costs)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage_scenario.total_purchase_costs)}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Rent Paid</strong></td>
+                <td class="text-end">${formatCurrency(results.rent_scenario.total_rent_paid)}</td>
+                <td class="text-end">-</td>
+                <td class="text-end">-</td>
+            </tr>
+            <tr>
+                <td><strong>Average Monthly Housing Cost</strong></td>
+                <td class="text-end">${formatCurrency(results.rent_scenario.avg_monthly_housing_cost)}</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage_scenario.avg_monthly_housing_cost)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage_scenario.avg_monthly_housing_cost)}</td>
+            </tr>
+        </tbody>
+    `;
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've made the following changes:
+1. Removed the "Component" header from both tables by replacing it with an empty `<th></th>`
+2. Made all component names bold by wrapping them in `<strong>` tags in both the static HTML template and the dynamic JavaScript table generation
+3. Ensured the formatting is consistent across both tables
+4. Maintained all existing functionality while updating the styling
+
+The tables should now display with bold component names and no "Component" header, making them cleaner and more visually appealing. Would you like me to make any additional adjustments to the table styling?
+
+---
+
+_**User**_
+
+Now change the width of the input parameters to take up +-35% and the results the remaining 65%
+
+---
+
+_**Assistant**_
+
+I'll help you adjust the grid layout to change the width distribution between the input parameters and results sections. I'll modify the CSS to achieve this ratio:
+
+---
+
+_**Assistant**_
+
+```
+// ... existing code ...
+/* Main Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 0.35fr 0.65fr;
+    gap: 2rem;
+    margin-top: 2rem;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Input and Results Sections */
+.input-section {
+    min-width: 300px;
+    max-width: none;
+    width: 100%;
+}
+
+.results-section {
+    overflow: visible;
+    height: auto;
+    min-height: 0;
+    width: 100%;
+    min-width: 400px;
+    max-width: none;
+}
+
+@media (max-width: 1400px) {
+    .main-content {
+        gap: 1.5rem;
+    }
+    
+    .input-section {
+        min-width: 280px;
+    }
+    
+    .results-section {
+        min-width: 380px;
+    }
+}
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**Assistant**_
+
+
+
+I've made the following changes to achieve the 35/65 split:
+
+1. Changed the grid template columns from `0.9fr 1.1fr` to `0.35fr 0.65fr` to achieve the desired ratio
+2. Updated the input section's dimensions:
+   - Set `min-width: 300px` to ensure readability
+   - Removed the maximum width constraint
+   - Set `width: 100%` to fill the available space
+3. Updated the results section's dimensions:
+   - Set `min-width: 400px` to accommodate the tables
+   - Removed the maximum width constraint
+   - Kept `width: 100%` to fill the available space
+4. Adjusted the responsive breakpoints for smaller screens:
+   - Reduced minimum widths for both sections
+   - Removed maximum width constraints to allow better scaling
+
+These changes should give you a clean 35/65 split between the input parameters and results sections while maintaining responsiveness and readability. Would you like me to make any additional adjustments to the layout?
+
+---
+
+_**User**_
+
+Remove the remaining mortgage from the graph legend too.
+
+---
+
+_**Assistant**_
+
+I'll help you remove the "Remaining Mortgage" dataset from the chart configuration in the JavaScript file.
+
+---
+
+_**Assistant**_
+
+```
+// ... existing code ...
+    const data = {
+        labels: ['Rent + Invest', 'Max Mortgage', 'Min Mortgage'],
+        datasets: [
+            {
+                label: 'Growth of Initial Savings',
+                data: [
+                    results.rent.principal_investment_value,
+                    results.max_mortgage.principal_investment_value,
+                    results.min_mortgage.principal_investment_value
+                ],
+                backgroundColor: 'rgba(52, 152, 219, 0.5)',
+                borderColor: 'rgba(52, 152, 219, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Growth of Monthly Savings',
+                data: [
+                    results.rent.monthly_investment_value,
+                    results.max_mortgage.monthly_investment_value,
+                    results.min_mortgage.monthly_investment_value
+                ],
+                backgroundColor: 'rgba(46, 204, 113, 0.5)',
+                borderColor: 'rgba(46, 204, 113, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'House Value',
+                data: [
+                    0,
+                    results.max_mortgage.house_value,
+                    results.min_mortgage.house_value
+                ],
+                backgroundColor: 'rgba(155, 89, 182, 0.5)',
+                borderColor: 'rgba(155, 89, 182, 1)',
+                borderWidth: 1
+            }
+        ]
+    };
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+Let me try again with a more specific edit:
+
+---
+
+_**Assistant**_
+
+```
+undefined
+```
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**User**_
+
+this table headers shows double: 
+
+---
+
+_**Assistant**_
+
+Ah yes, I see the issue. The table headers are being duplicated because they're being added both in the HTML template and in the JavaScript when updating the table content. Let me fix that by removing the `thead` sections from the dynamic content in the JavaScript:
+
+---
+
+_**Assistant**_
+
+```
+undefined
+```
+
+---
+
+_**Assistant**_
+
 
 
 ---

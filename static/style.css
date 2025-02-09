@@ -53,7 +53,7 @@ body {
 /* Main Layout */
 .main-content {
     display: grid;
-    grid-template-columns: 0.9fr 1.1fr;
+    grid-template-columns: 0.35fr 0.65fr;
     gap: 2rem;
     margin-top: 2rem;
     max-width: 100%;
@@ -78,8 +78,9 @@ h1 {
 }
 
 .input-section {
-    min-width: 400px;
-    max-width: 600px;
+    min-width: 300px;
+    max-width: none;
+    width: 100%;
 }
 
 .results-section {
@@ -87,8 +88,8 @@ h1 {
     height: auto;
     min-height: 0;
     width: 100%;
-    min-width: 500px;
-    max-width: 900px;
+    min-width: 400px;
+    max-width: none;
 }
 
 .input-section h5 {
@@ -229,13 +230,11 @@ h1 {
     }
     
     .input-section {
-        min-width: 350px;
-        max-width: 550px;
+        min-width: 280px;
     }
     
     .results-section {
-        min-width: 450px;
-        max-width: 800px;
+        min-width: 380px;
     }
 }
 
