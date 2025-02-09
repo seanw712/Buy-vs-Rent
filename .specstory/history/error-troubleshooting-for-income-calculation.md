@@ -1308,6 +1308,143 @@ Make it 'Explainer & Assumptions -> Click to Read'
 
 _**Assistant**_
 
+I'll update the text in the accordion button to use an arrow instead of parentheses:
+
+---
+
+_**Assistant**_
+
+```
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#explainerContent">
+                            <strong>Explainer & Assumptions</strong> -> Click to Read
+                        </button>
+                    </h2>
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've updated the text to use an arrow (->) instead of parentheses, making it more visually distinct and directive. The text now reads "Explainer & Assumptions -> Click to Read" with "Explainer & Assumptions" still in bold.
+
+---
+
+_**User**_
+
+Now help me ensure that the calculator takes up the full page instead of being squished on the sides left & right. 
+
+---
+
+_**Assistant**_
+
+I'll help you adjust the CSS to make the calculator take up more horizontal space. I'll modify the container width and padding in the CSS file:
+
+---
+
+_**Assistant**_
+
+```
+.page-wrapper {
+    width: 100%;
+    max-width: 2400px;
+    margin: 0 auto;
+    transform: scale(0.8);
+    transform-origin: top center;
+}
+
+.container {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    margin-bottom: 20vh;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Main Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Input and Results Sections */
+.input-section,
+.results-section {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    background: var(--primary-gradient);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've made several adjustments to the CSS:
+
+1. Increased the maximum width of the page wrapper from 2200px to 2400px
+2. Changed the page wrapper width from 98% to 100%
+3. Reduced the body padding from 20px to 10px
+4. Reduced the container padding from 3rem to 2rem
+5. Added `max-width: 100%` to the container to ensure it doesn't get constrained
+6. Adjusted the gap between input and results sections from 2.5rem to 2rem for better space utilization
+
+These changes will make the calculator use more of the available screen width while maintaining the proper spacing and readability. The calculator should now feel less constrained and make better use of the available space.
+
+Would you like me to make any additional adjustments to the spacing or layout?
+
+---
+
+_**User**_
+
+It still looks like this I want it wider so it takes up most of the page.
+
+---
+
+_**Assistant**_
+
+I'll adjust the CSS to make the calculator take up more of the page width. Let's modify the scaling and width properties:
+
+---
+
+_**Assistant**_
+
+```
+undefined
+```
+
+---
+
+_**Assistant**_
+
 
 
 ---
