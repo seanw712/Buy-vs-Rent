@@ -1438,8 +1438,472 @@ I'll adjust the CSS to make the calculator take up more of the page width. Let's
 _**Assistant**_
 
 ```
-undefined
+body {
+    background: var(--primary-gradient);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    margin: 0;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+}
+
+.page-wrapper {
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    transform: scale(0.9);
+    transform-origin: top center;
+}
+
+.container {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    margin: 0 2rem 20vh 2rem;
+    width: calc(100% - 4rem);
+    max-width: none;
+}
+
+/* Main Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .page-wrapper {
+        transform: scale(0.95);
+        margin-bottom: 0;
+    }
+    
+    .container {
+        padding: 2rem;
+        margin: 0 1rem 20vh 1rem;
+        width: calc(100% - 2rem);
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: var(--spacing-sm);
+    }
+    
+    .container {
+        padding: 1rem;
+        margin: 0 0.5rem;
+        width: calc(100% - 1rem);
+    }
+    
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .page-wrapper {
+        transform: scale(1);
+    }
+}
+
+// ... existing code ...
 ```
+
+---
+
+_**Assistant**_
+
+
+
+I've made several changes to make the calculator wider and use more screen space:
+
+1. Removed the maximum width constraint on the page wrapper
+2. Increased the scale from 0.8 to 0.9 for better visibility
+3. Adjusted the container margins and width to use more screen space
+4. Modified the grid layout to give more space to the results section (0.8fr : 1.2fr ratio)
+5. Improved responsive scaling for different screen sizes
+6. Reduced body padding to 5px
+7. Adjusted margins and widths in media queries for better responsiveness
+
+These changes should make the calculator take up significantly more of the page width while maintaining proper spacing and readability. The content should now stretch more naturally across the screen.
+
+Would you like me to make any additional adjustments to the layout or spacing?
+
+---
+
+_**User**_
+
+I want the results section to be like 15% thinner and move a bit more to the right so there is more space for the Input Parameters (now it rescales to be squished when I click calculate, I don't like that).
+
+---
+
+_**Assistant**_
+
+
+
+I'll adjust the grid layout and spacing to make the results section thinner and give more space to the input parameters. Here's the update:
+
+---
+
+_**Assistant**_
+
+```
+/* Main Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-top: 2rem;
+}
+
+/* Input and Results Sections */
+.input-section,
+.results-section {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-section {
+    min-width: 500px;  /* Ensure minimum width for input section */
+}
+
+.results-section {
+    overflow: visible;
+    height: auto;
+    min-height: 0;
+    max-width: 800px;  /* Limit maximum width of results section */
+    margin-left: auto;  /* Push results section to the right */
+}
+
+.chart-container {
+    width: 100%;
+    min-height: 400px;
+    margin-bottom: 2rem;
+    max-width: 800px;  /* Match results section max-width */
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .main-content {
+        gap: 2rem;
+    }
+    
+    .input-section {
+        min-width: 450px;
+    }
+    
+    .results-section {
+        max-width: 700px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .input-section {
+        min-width: unset;
+    }
+    
+    .results-section {
+        max-width: none;
+    }
+}
+
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've made several changes to improve the layout:
+
+1. Changed the grid layout to equal columns (1fr 1fr) with more gap space (3rem)
+2. Added a minimum width (500px) to the input section to prevent squishing
+3. Added a maximum width (800px) to the results section and chart container
+4. Used `margin-left: auto` to push the results section slightly to the right
+5. Improved responsive behavior at different breakpoints
+6. Added proper scaling for different screen sizes
+
+These changes should:
+- Prevent the input section from being squished when calculating
+- Make the results section slightly thinner
+- Create more balanced spacing between sections
+- Maintain proper layout across different screen sizes
+
+Would you like me to make any additional adjustments to the spacing or sizing?
+
+---
+
+_**User**_
+
+The results section is now overly thin before clikcing calculation and it also goes beyond the borders of the larger box. It doesn't look well.
+
+---
+
+_**Assistant**_
+
+
+
+I'll adjust the layout to make the results section more balanced and ensure it stays within the container borders. Here's the fix:
+
+---
+
+_**Assistant**_
+
+```
+/* Main Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Input and Results Sections */
+.input-section,
+.results-section {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-section {
+    min-width: 400px;
+    max-width: 600px;
+}
+
+.results-section {
+    overflow: visible;
+    height: auto;
+    min-height: 0;
+    width: 100%;
+    min-width: 500px;
+    max-width: 900px;
+}
+
+.chart-container {
+    width: 100%;
+    min-height: 400px;
+    margin-bottom: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .main-content {
+        gap: 1.5rem;
+    }
+    
+    .input-section {
+        min-width: 350px;
+        max-width: 550px;
+    }
+    
+    .results-section {
+        min-width: 450px;
+        max-width: 800px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .input-section,
+    .results-section {
+        min-width: unset;
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've made several adjustments to fix the layout issues:
+
+1. Changed the grid columns to a slightly more balanced ratio (0.9fr : 1.1fr)
+2. Added `max-width: 100%` and `overflow: hidden` to the main content to prevent overflow
+3. Set more balanced min and max widths for both sections:
+   - Input section: min-width: 400px, max-width: 600px
+   - Results section: min-width: 500px, max-width: 900px
+4. Removed the `margin-left: auto` that was pushing the results section too far right
+5. Improved responsive breakpoints for better scaling
+6. Made both sections use percentage-based widths where appropriate
+
+These changes should:
+- Keep the results section properly sized before and after calculation
+- Prevent overflow beyond the container borders
+- Maintain a balanced layout between input and results
+- Scale properly on different screen sizes
+
+Would you like me to make any additional adjustments to the layout?
+
+---
+
+_**User**_
+
+Rescale the table so I don't have to scroll to view everything. Do the same for the additional information table.
+
+---
+
+_**Assistant**_
+
+
+
+I'll adjust the table styling to make it more compact and fully visible without scrolling. Here's the update:
+
+---
+
+_**Assistant**_
+
+```
+/* Tables */
+.table-container {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    background: white;
+    font-size: 0.9rem;
+    table-layout: fixed;
+}
+
+.table th,
+.table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: right;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.table th:first-child,
+.table td:first-child {
+    text-align: left;
+    width: 25%;
+}
+
+.table th:not(:first-child),
+.table td:not(:first-child) {
+    width: 25%;
+}
+
+/* Net Worth Summary and Additional Info sections */
+.net-worth-summary,
+.additional-info {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-md);
+    width: 100%;
+}
+
+.additional-info {
+    margin-top: 1.5rem;
+}
+
+.additional-info h5 {
+    margin-bottom: 1rem;
+}
+
+/* Responsive adjustments for tables */
+@media (max-width: 1200px) {
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.4rem;
+    }
+}
+
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've made several changes to improve the table layout:
+
+1. Removed the horizontal scrolling and minimum width constraints
+2. Added fixed table layout with equal column widths (25% each)
+3. Reduced padding in cells to make content more compact
+4. Enabled word wrapping for long content
+5. Made the first column (Component) take up 25% of the width
+6. Reduced font sizes slightly at smaller screen sizes
+7. Adjusted padding for different screen sizes
+8. Removed the `nowrap` constraint that was forcing horizontal scrolling
+9. Made both tables (net worth summary and additional info) use consistent styling
+
+These changes should make both tables fully visible without requiring scrolling, while maintaining readability and proper alignment. The content should now wrap naturally within each cell if needed.
+
+Would you like me to make any additional adjustments to the table layout?
+
+---
+
+_**User**_
+
+Put each of the components in bold for both tables, and remove the 'Components' header
 
 ---
 

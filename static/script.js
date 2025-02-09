@@ -278,53 +278,73 @@ function updateResults(results) {
     // Update Net Worth Summary Table
     const netWorthTable = document.querySelector('.net-worth-summary .table tbody');
     netWorthTable.innerHTML = `
-        <tr>
-            <td>Growth of Initial Savings</td>
-            <td class="text-end">${formatCurrency(results.rent.principal_investment_value)}</td>
-            <td class="text-end">${formatCurrency(results.max_mortgage.principal_investment_value)}</td>
-            <td class="text-end">${formatCurrency(results.min_mortgage.principal_investment_value)}</td>
-        </tr>
-        <tr>
-            <td>Growth of Monthly Savings</td>
-            <td class="text-end">${formatCurrency(results.rent.monthly_investment_value)}</td>
-            <td class="text-end">${formatCurrency(results.max_mortgage.monthly_investment_value)}</td>
-            <td class="text-end">${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
-        </tr>
-        <tr>
-            <td>House Value</td>
-            <td class="text-end">-</td>
-            <td class="text-end">${formatCurrency(results.max_mortgage.house_value)}</td>
-            <td class="text-end">${formatCurrency(results.min_mortgage.house_value)}</td>
-        </tr>
-        <tr class="table-primary">
-            <th>Net Worth</th>
-            <td class="text-end">${formatCurrency(results.rent.net_worth)}</td>
-            <td class="text-end">${formatCurrency(results.max_mortgage.net_worth)}</td>
-            <td class="text-end">${formatCurrency(results.min_mortgage.net_worth)}</td>
-        </tr>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Rent + Invest</th>
+                <th>Max Mortgage</th>
+                <th>Min Mortgage</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Growth of Initial Savings</strong></td>
+                <td class="text-end">${formatCurrency(results.rent.principal_investment_value)}</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage.principal_investment_value)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage.principal_investment_value)}</td>
+            </tr>
+            <tr>
+                <td><strong>Growth of Monthly Savings</strong></td>
+                <td class="text-end">${formatCurrency(results.rent.monthly_investment_value)}</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage.monthly_investment_value)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
+            </tr>
+            <tr>
+                <td><strong>House Value</strong></td>
+                <td class="text-end">-</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage.house_value)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage.house_value)}</td>
+            </tr>
+            <tr class="table-primary">
+                <th><strong>Net Worth</strong></th>
+                <td class="text-end">${formatCurrency(results.rent.net_worth)}</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage.net_worth)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage.net_worth)}</td>
+            </tr>
+        </tbody>
     `;
     
     // Update Additional Information Table
     const additionalInfoTable = document.querySelector('.additional-info .table tbody');
     additionalInfoTable.innerHTML = `
-        <tr>
-            <td>Total Interest + Purchase Costs</td>
-            <td class="text-end">-</td>
-            <td class="text-end">${formatCurrency(results.max_mortgage.total_purchase_costs)}</td>
-            <td class="text-end">${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>
-        </tr>
-        <tr>
-            <td>Total Rent Paid</td>
-            <td class="text-end">${formatCurrency(results.rent.total_rent_paid)}</td>
-            <td class="text-end">-</td>
-            <td class="text-end">-</td>
-        </tr>
-        <tr>
-            <td>Average Monthly Housing Cost</td>
-            <td class="text-end">${formatCurrency(results.rent.total_rent_paid / (getFormData().time_horizon_years * 12))}</td>
-            <td class="text-end">${formatCurrency(results.max_mortgage.monthly_mortgage_max)}</td>
-            <td class="text-end">${formatCurrency(results.min_mortgage.monthly_mortgage_min)}</td>
-        </tr>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Rent + Invest</th>
+                <th>Max Mortgage</th>
+                <th>Min Mortgage</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Total Interest + Purchase Costs</strong></td>
+                <td class="text-end">-</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage.total_purchase_costs)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Rent Paid</strong></td>
+                <td class="text-end">${formatCurrency(results.rent.total_rent_paid)}</td>
+                <td class="text-end">-</td>
+                <td class="text-end">-</td>
+            </tr>
+            <tr>
+                <td><strong>Average Monthly Housing Cost</strong></td>
+                <td class="text-end">${formatCurrency(results.rent.total_rent_paid / (getFormData().time_horizon_years * 12))}</td>
+                <td class="text-end">${formatCurrency(results.max_mortgage.monthly_mortgage_max)}</td>
+                <td class="text-end">${formatCurrency(results.min_mortgage.monthly_mortgage_min)}</td>
+            </tr>
+        </tbody>
     `;
     
     // Update chart
