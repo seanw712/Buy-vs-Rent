@@ -1020,7 +1020,283 @@ Now remove the 'Remaining Mortgage' from the HTML table
 
 _**Assistant**_
 
+I'll help you remove the "Remaining Mortgage" row from both tables in the HTML where it appears. Here's the change:
 
+```html:templates/index.html
+<!-- In the net-worth-summary table, remove this row: -->
+<div class="net-worth-summary">
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Rent + Invest</th>
+                    <th>Max Mortgage</th>
+                    <th>Min Mortgage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Initial Investment Growth</td>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                </tr>
+                <tr>
+                    <td>Monthly Savings Growth</td>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                </tr>
+                <tr>
+                    <td>House Value</td>
+                    <td class="text-end">-</td>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                </tr>
+                <!-- Removed the Remaining Mortgage row -->
+                <tr class="table-primary">
+                    <th>Net Worth</th>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+```
+
+And also update the JavaScript where these tables are dynamically updated:
+
+```javascript:static/script.js
+// In the updateResults function, update the netWorthTable.innerHTML:
+netWorthTable.innerHTML = `
+    <tr>
+        <td>Initial Investment Growth</td>
+        <td class="text-end">${formatCurrency(results.rent.principal_investment_value)}</td>
+        <td class="text-end">${formatCurrency(results.max_mortgage.principal_investment_value)}</td>
+        <td class="text-end">${formatCurrency(results.min_mortgage.principal_investment_value)}</td>
+    </tr>
+    <tr>
+        <td>Monthly Savings Growth</td>
+        <td class="text-end">${formatCurrency(results.rent.monthly_investment_value)}</td>
+        <td class="text-end">${formatCurrency(results.max_mortgage.monthly_investment_value)}</td>
+        <td class="text-end">${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
+    </tr>
+    <tr>
+        <td>House Value</td>
+        <td class="text-end">-</td>
+        <td class="text-end">${formatCurrency(results.max_mortgage.house_value)}</td>
+        <td class="text-end">${formatCurrency(results.min_mortgage.house_value)}</td>
+    </tr>
+    <tr class="table-primary">
+        <th>Net Worth</th>
+        <td class="text-end">${formatCurrency(results.rent.net_worth)}</td>
+        <td class="text-end">${formatCurrency(results.max_mortgage.net_worth)}</td>
+        <td class="text-end">${formatCurrency(results.min_mortgage.net_worth)}</td>
+    </tr>
+`;
+```
+
+This will remove the "Remaining Mortgage" row from the display while keeping all other functionality intact. The net worth calculation will still include the remaining mortgage in the backend, it just won't be shown as a separate line item in the table.
+
+---
+
+_**User**_
+
+Now put the explainer & assumptions section right below the 'House vs Stocks Calculator Heading'
+
+---
+
+_**Assistant**_
+
+I'll help you move the explainer & assumptions section to be right below the main heading. I'll edit the HTML file to make this change:
+
+---
+
+_**Assistant**_
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House vs Stocks Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="container">
+            <h1 class="mb-4">House vs Stocks Calculator</h1>
+            
+            <!-- Moved Explainer section here -->
+            <div class="explainer-section mb-4">
+                <h5>Explainer & Assumptions</h5>
+                <div class="explainer-content">
+                    <p>This calculator compares the financial outcomes of renting versus buying a home by analyzing three scenarios:</p>
+                    
+                    <ol>
+                        <li>Continue renting</li>
+                        <li>Buy with minimum down payment (maximum mortgage)</li>
+                        <li>Buy using all available savings as down payment (minimum mortgage)</li>
+                    </ol>
+
+                    <h6 class="mt-4">Assumptions:</h6>
+                    <ul class="assumptions-list">
+                        <li>
+                            <strong>Investment returns:</strong> Any surplus money after expenses and housing costs is invested at the 
+                            <span class="variable-highlight">Investment Return Rate</span> (use bank interest rate if not planning to invest)
+                        </li>
+                        <li>
+                            <strong>Income and rent growth:</strong> Both disposable income (<span class="variable-highlight">Monthly Savings</span> + 
+                            <span class="variable-highlight">Current Rent</span>) and rent payments increase annually with 
+                            <span class="variable-highlight">Consumer Price Inflation</span>
+                        </li>
+                        <li>
+                            <strong>Property appreciation:</strong> Home value grows according to the 
+                            <span class="variable-highlight">House Price Inflation Rate</span>
+                        </li>
+                        <li>
+                            <strong>Housing costs:</strong> <span class="variable-highlight">Average Monthly Housing Cost</span> 
+                            calculates the mean rent/mortgage payment over your <span class="variable-highlight">Time Horizon</span>
+                        </li>
+                        <li>
+                            <strong>Mortgage-free period:</strong> If <span class="variable-highlight">Time Horizon</span> exceeds 
+                            <span class="variable-highlight">Mortgage Term</span>, the calculator accounts for years without mortgage payments
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <!-- Input Section -->
+                <div class="input-section">
+                    <h5>Input Parameters</h5>
+                    <form id="calculatorForm">
+                        <div class="form-group">
+                            <label for="initial_savings">Initial Savings (€)</label>
+                            <small class="form-text text-muted d-block mb-2">Your current total savings that you are comfortable investing (house or investments)</small>
+                            <input type="number" class="form-control" id="initial_savings" value="{{ config.DEFAULT_INITIAL_SAVINGS }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="house_cost">House Cost (€)</label>
+                            <small class="form-text text-muted d-block mb-2">Your share of the house price, if you will be buying a house together.</small>
+                            <input type="number" class="form-control" id="house_cost" value="{{ config.DEFAULT_HOUSE_COST }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="monthly_rent">Rent/Month (€)</label>
+                            <input type="number" class="form-control" id="monthly_rent" value="{{ config.DEFAULT_MONTHLY_RENT }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="monthly_savings_capacity">Monthly Savings (€)</label>
+                            <small class="form-text text-muted d-block mb-2">Remaining income after all expenses and rent, available for investing.</small>
+                            <input type="number" class="form-control" id="monthly_savings_capacity" value="{{ config.DEFAULT_MONTHLY_SAVINGS_CAPACITY}}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="time_horizon_years">Time Horizon (Years)</label>
+                            <input type="number" class="form-control" id="time_horizon_years" value="{{ config.DEFAULT_TIME_HORIZON_YEARS }}">
+                        </div>
+                        
+                        <!-- Remove the explainer section from here -->
+                        
+                        <div class="accordion mb-3" id="advancedOptions">
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've moved the explainer & assumptions section to be right below the main heading and before the main content section. The section maintains all its original content and styling but is now positioned at the top of the page where it will be more visible to users before they start interacting with the calculator.
+
+The change preserves all the existing functionality while making the explanatory information more prominent and accessible to users right from the start. This should help users better understand how the calculator works before they begin inputting their data.
+
+Would you like me to make any adjustments to the positioning or styling of the moved section?
+
+---
+
+_**User**_
+
+Now make this Explainer & Assumptions section to be a click to drop down. And mention this in the header 'Explainer & Assumtions (click to read)'
+
+---
+
+_**Assistant**_
+
+I'll modify the explainer section to be a collapsible dropdown using Bootstrap's accordion component. Here's the change:
+
+---
+
+_**Assistant**_
+
+```
+undefined
+```
+
+---
+
+_**Assistant**_
+
+
+
+---
+
+_**User**_
+
+Put the 'Explainer & assumtpions' in bold and Change the name of this calculator to : Buy vs. Rent Financial Calculator
+
+---
+
+_**Assistant**_
+
+I'll help you make those changes to the HTML file:
+
+---
+
+_**Assistant**_
+
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy vs. Rent Financial Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="container">
+            <h1 class="mb-4">Buy vs. Rent Financial Calculator</h1>
+            
+            <!-- Convert to accordion -->
+            <div class="accordion mb-4" id="explainerAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#explainerContent">
+                            <strong>Explainer & Assumptions</strong> (click to read)
+                        </button>
+                    </h2>
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've made the following changes:
+1. Updated the page title in both the `<title>` tag and the main `<h1>` heading to "Buy vs. Rent Financial Calculator"
+2. Made "Explainer & Assumptions" bold by wrapping it in `<strong>` tags within the accordion button
+
+The changes maintain all the existing functionality while updating the naming to better reflect the calculator's purpose and making the explainer section more prominent.
 
 ---
 
