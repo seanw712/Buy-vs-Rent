@@ -1300,6 +1300,18 @@ The changes maintain all the existing functionality while updating the naming to
 
 ---
 
+_**User**_
+
+Make it 'Explainer & Assumptions -> Click to Read'
+
+---
+
+_**Assistant**_
+
+
+
+---
+
 
 
 ---
