@@ -189,7 +189,7 @@ function updateResultsTable(results) {
                     <td>${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>
                 </tr>
                 <tr>
-                    <td>Total Rent Paid</td>
+                    <td>Total Rent Costs</td>
                     <td>${formatCurrency(results.rent.total_rent_paid)}</td>
                     <td>-</td>
                     <td>-</td>
@@ -303,7 +303,7 @@ function updateResults(results) {
             <td class="text-end">${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>
         </tr>
         <tr>
-            <td><strong>Total Rent Paid</strong></td>
+            <td><strong>Total Rent Costs</strong></td>
             <td class="text-end">${formatCurrency(results.rent.total_rent_paid)}</td>
             <td class="text-end">-</td>
             <td class="text-end">-</td>
