@@ -31,7 +31,7 @@ function updateChart(results) {
         labels: ['Rent + Invest', 'Max Mortgage', 'Min Mortgage'],
         datasets: [
             {
-                label: 'Initial Investment Growth',
+                label: 'Growth of Initial Savings',
                 data: [
                     results.rent.principal_investment_value,
                     results.max_mortgage.principal_investment_value,
@@ -42,7 +42,7 @@ function updateChart(results) {
                 borderWidth: 1
             },
             {
-                label: 'Monthly Savings Growth',
+                label: 'Growth of Monthly Savings',
                 data: [
                     results.rent.monthly_investment_value,
                     results.max_mortgage.monthly_investment_value,
@@ -150,13 +150,13 @@ function updateResultsTable(results) {
             </thead>
             <tbody>
                 <tr>
-                    <td>Initial Investment Growth</td>
+                    <td>Growth of Initial Savings</td>
                     <td>${formatCurrency(results.rent.principal_investment_value)}</td>
                     <td>${formatCurrency(results.max_mortgage.principal_investment_value)}</td>
                     <td>${formatCurrency(results.min_mortgage.principal_investment_value)}</td>
                 </tr>
                 <tr>
-                    <td>Monthly Savings Growth</td>
+                    <td>Growth of Monthly Savings</td>
                     <td>${formatCurrency(results.rent.monthly_investment_value)}</td>
                     <td>${formatCurrency(results.max_mortgage.monthly_investment_value)}</td>
                     <td>${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
@@ -279,13 +279,13 @@ function updateResults(results) {
     const netWorthTable = document.querySelector('.net-worth-summary .table tbody');
     netWorthTable.innerHTML = `
         <tr>
-            <td>Initial Investment Growth</td>
+            <td>Growth of Initial Savings</td>
             <td class="text-end">${formatCurrency(results.rent.principal_investment_value)}</td>
             <td class="text-end">${formatCurrency(results.max_mortgage.principal_investment_value)}</td>
             <td class="text-end">${formatCurrency(results.min_mortgage.principal_investment_value)}</td>
         </tr>
         <tr>
-            <td>Monthly Savings Growth</td>
+            <td>Growth of Monthly Savings</td>
             <td class="text-end">${formatCurrency(results.rent.monthly_investment_value)}</td>
             <td class="text-end">${formatCurrency(results.max_mortgage.monthly_investment_value)}</td>
             <td class="text-end">${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
@@ -295,12 +295,6 @@ function updateResults(results) {
             <td class="text-end">-</td>
             <td class="text-end">${formatCurrency(results.max_mortgage.house_value)}</td>
             <td class="text-end">${formatCurrency(results.min_mortgage.house_value)}</td>
-        </tr>
-        <tr>
-            <td>Remaining Mortgage</td>
-            <td class="text-end">-</td>
-            <td class="text-end">${formatCurrency(-results.max_mortgage.remaining_mortgage)}</td>
-            <td class="text-end">${formatCurrency(-results.min_mortgage.remaining_mortgage)}</td>
         </tr>
         <tr class="table-primary">
             <th>Net Worth</th>

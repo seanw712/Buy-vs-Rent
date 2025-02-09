@@ -1005,7 +1005,22 @@ This will:
 2. Style it with a light background and proper spacing
 3. Highlight variables using a special format (purple text with light background)
 4. Make it responsive for mobile devices
-5. Keep
+5. Keep the styling consistent with your existing design
+6. Format the text for better readability with proper headings and lists
+
+The variables will be highlighted in a subtle purple color that matches your existing color scheme, making it easy to connect them with the actual input fields and results in the calculator.
+
+---
+
+_**User**_
+
+Now remove the 'Remaining Mortgage' from the HTML table
+
+---
+
+_**Assistant**_
+
+
 
 ---
 
