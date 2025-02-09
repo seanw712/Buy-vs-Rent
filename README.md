@@ -1,4 +1,4 @@
-# House vs Stocks Calculator
+# Buy vs Rent Calculator
 
 A financial calculator to compare three wealth-building scenarios:
 1. Renting + Investing
