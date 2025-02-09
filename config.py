@@ -18,7 +18,7 @@ DEFAULT_MORTGAGE_TERM_YEARS = 25  # 25 years mortgage term
 DEFAULT_MIN_DOWN_PAYMENT_PERCENT = 0.15  # 15% minimum down payment
 
 # Mortgage Constants
-MIN_DOWN_PAYMENT_PERCENT = 0.15  # 15% minimum down payment
+MIN_DOWN_PAYMENT_PERCENT = 0.10  # 10% minimum down payment
 MAX_DOWN_PAYMENT_PERCENT = 0.90  # 90% maximum down payment
 
 # Transaction Costs
