@@ -457,7 +457,555 @@ I want the results page always to be shown next to the input section for desktop
 
 _**Assistant**_
 
+I'll update the media queries to maintain the side-by-side layout until mobile width. Here's the change:
 
+```css:static/style.css
+/* Main Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 2.5rem;
+    margin-top: 2rem;
+}
+
+/* Update responsive breakpoints */
+@media (max-width: 1400px) {
+    .page-wrapper {
+        transform: scale(0.8);
+        margin-bottom: 0;
+    }
+    
+    .container {
+        padding: 2rem;
+    }
+    
+    .input-section {
+        min-width: unset;
+    }
+}
+
+/* Only switch to single column on mobile */
+@media (max-width: 768px) {
+    body {
+        padding: var(--spacing-sm);
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+    
+    .main-content {
+        grid-template-columns: 1fr;  /* Switch to single column only on mobile */
+        gap: 2rem;
+    }
+    
+    .input-section,
+    .results-section,
+    .additional-info {
+        padding: var(--spacing-md);
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table td, .table th {
+        padding: 0.5rem;
+    }
+    
+    .page-wrapper {
+        transform: scale(1);
+    }
+}
+```
+
+Key changes:
+1. Removed the grid layout change from the 1400px breakpoint
+2. Only change to single column layout at the mobile breakpoint (768px)
+3. Maintained the side-by-side layout for all larger screens
+
+This will keep the inputs and results side-by-side until the screen width becomes too narrow for mobile viewing.
+
+---
+
+_**User**_
+
+I get this error: An error occurred while calculating results. Please check the console for details.
+
+---
+
+_**Assistant**_
+
+Let's check the browser console for the specific error. In the meantime, I'll add better error handling and logging to help identify the issue:
+
+```javascript:static/script.js
+// Handle form submission
+document.getElementById('calculatorForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Show loading spinner and hide results
+    document.getElementById('loadingSpinner').style.display = 'block';
+    document.getElementById('resultsArea').style.display = 'none';
+    
+    try {
+        // Get form data
+        const formData = getFormData();
+        
+        // Debug log the form data
+        console.log('Sending form data:', formData);
+        
+        // Send calculation request
+        const response = await fetch('/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        // Log the raw response
+        console.log('Raw response:', response);
+
+        const results = await response.json();
+        
+        // Log the parsed results
+        console.log('Parsed results:', results);
+
+        if (results.error) {
+            console.error('Server returned error:', results.error);
+            alert('Calculation error: ' + results.error);
+            document.getElementById('loadingSpinner').style.display = 'none';
+            return;
+        }
+
+        // Update UI with results
+        updateResults(results);
+        
+    } catch (error) {
+        console.error('Detailed error:', error);
+        console.error('Error stack:', error.stack);
+        alert('An error occurred while calculating results. Please check the console for details.');
+        document.getElementById('loadingSpinner').style.display = 'none';
+    }
+});
+
+// Update getFormData to include validation and logging
+function getFormData() {
+    const formData = {
+        initial_savings: parseFloat(document.getElementById('initial_savings').value),
+        house_cost: parseFloat(document.getElementById('house_cost').value),
+        monthly_rent: parseFloat(document.getElementById('monthly_rent').value),
+        monthly_savings_capacity: parseFloat(document.getElementById('monthly_savings_capacity').value),
+        time_horizon_years: parseInt(document.getElementById('time_horizon_years').value),
+        mortgage_term_years: parseInt(document.getElementById('mortgage_term_years').value),
+        min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100,
+        house_purchase_fees_percent: parseFloat(document.getElementById('purchase_costs').value) / 100,
+        house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,
+        investment_return: parseFloat(document.getElementById('investment_return').value) / 100,
+        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,
+        cpi: parseFloat(document.getElementById('cpi').value) / 100
+    };
+
+    // Validate all values are numbers
+    for (const [key, value] of Object.entries(formData)) {
+        if (isNaN(value)) {
+            console.error(`Invalid value for ${key}: ${value}`);
+            throw new Error(`Please enter a valid number for ${key}`);
+        }
+    }
+
+    return formData;
+}
+```
+
+This enhanced error handling will help us identify where exactly the calculation is failing. Could you:
+
+1. Open your browser's developer tools (F12)
+2. Go to the Console tab
+3. Try submitting the form again
+4. Share the error messages that appear in the console
+
+This will help us pinpoint whether the error is:
+- Invalid form data
+- Server-side calculation error
+- Response parsing error
+- Data validation error
+
+---
+
+_**User**_
+
+ Cannot read properties of null (reading 'value')
+    at getFormData (http://127.0.0.1:5000/static/script.js:231:90)
+    at HTMLFormElement.<anonymous> (http://127.0.0.1:5000/static/script.js:350:26)
+
+---
+
+_**Assistant**_
+
+
+
+Ah, the error indicates that one of the form fields can't be found in the HTML. Looking at the `getFormData` function, it seems the issue is with the `purchase_costs` field. Let's fix the field ID mismatch:
+
+```javascript:static/script.js
+function getFormData() {
+    const formData = {
+        initial_savings: parseFloat(document.getElementById('initial_savings').value),
+        house_cost: parseFloat(document.getElementById('house_cost').value),
+        monthly_rent: parseFloat(document.getElementById('monthly_rent').value),
+        monthly_savings_capacity: parseFloat(document.getElementById('monthly_savings_capacity').value),
+        time_horizon_years: parseInt(document.getElementById('time_horizon_years').value),
+        mortgage_term_years: parseInt(document.getElementById('mortgage_term_years').value),
+        min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100,
+        // Changed from purchase_costs to house_purchase_fees_percent to match HTML
+        house_purchase_fees_percent: parseFloat(document.getElementById('house_purchase_fees_percent').value) / 100,
+        house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,
+        investment_return: parseFloat(document.getElementById('investment_return').value) / 100,
+        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,
+        cpi: parseFloat(document.getElementById('cpi').value) / 100
+    };
+
+    // Validate all values are numbers
+    for (const [key, value] of Object.entries(formData)) {
+        if (isNaN(value)) {
+            console.error(`Invalid value for ${key}: ${value}`);
+            throw new Error(`Please enter a valid number for ${key}`);
+        }
+    }
+
+    return formData;
+}
+```
+
+And let's update the corresponding HTML field to match:
+
+```html:templates/index.html
+<!-- ... existing code ... -->
+<div class="form-group">
+    <label for="house_purchase_fees_percent">Purchase Costs (%)</label>
+    <small class="form-text text-muted d-block mb-2">Notary fees etc. associated with buying a house</small>
+    <input type="number" class="form-control" id="house_purchase_fees_percent" value="7" min="0" max="20" step="1" required>
+</div>
+<!-- ... existing code ... -->
+```
+
+The error occurred because the JavaScript was looking for an element with ID `purchase_costs`, but in the HTML it was named differently. This change ensures the IDs match between the JavaScript and HTML.
+
+---
+
+_**User**_
+
+I have changed the name of one of hte variables  in the ScenarioResults class. Where should I update this variable in the other files to ensure it doesn't break?
+
+---
+
+_**Assistant**_
+
+Since you changed `total_interest_paid` to `total_purchase_costs` in the `ScenarioResults` class, we need to update all references to this variable in other files. Here are the necessary changes:
+
+```javascript:static/script.js
+// Update in the results table HTML generation
+function updateResultsTable(results) {
+    const tableHtml = `
+        // ... existing code ...
+        <tr>
+            <td>Total Purchase Costs</td>
+            <td>-</td>
+            <td>${formatCurrency(results.max_mortgage.total_purchase_costs)}</td>
+            <td>${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>
+        </tr>
+        // ... rest of the table
+    `;
+    // ... rest of the function
+}
+
+// Update in the Additional Information Table
+function updateResults(results) {
+    // ... existing code ...
+    
+    // Update Additional Information Table
+    const additionalInfoTable = document.querySelector('.additional-info .table tbody');
+    additionalInfoTable.innerHTML = `
+        <tr>
+            <td>Total Purchase Costs</td>
+            <td class="text-end">-</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.total_purchase_costs)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>
+        </tr>
+        // ... rest of the table
+    `;
+    // ... rest of the function
+}
+```
+
+```html:templates/index.html
+<!-- Update in the Additional Information section -->
+<div class="additional-info mt-4 mb-4">
+    <h5>Additional Information</h5>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Rent + Invest</th>
+                    <th>Max Mortgage</th>
+                    <th>Min Mortgage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Purchase Costs</td>
+                    <td class="text-end">-</td>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                </tr>
+                <!-- ... rest of the table rows ... -->
+            </tbody>
+        </table>
+    </div>
+</div>
+```
+
+```python:app.py
+# No changes needed in app.py since it uses asdict() to serialize the ScenarioResults,
+# which will automatically use the new variable name
+```
+
+The key changes are:
+1. Updated the table HTML in both `updateResultsTable` and `updateResults` functions to use `total_purchase_costs` instead of `total_interest_paid`
+2. Updated the static HTML table in `index.html` to show "Total Purchase Costs" instead of "Total Interest Paid"
+3. No changes needed in `app.py` since it uses automatic serialization
+
+These changes will ensure the new variable name is used consistently throughout the application.
+
+---
+
+_**User**_
+
+Explain to me in pseudocode why and where to update this variable.
+
+---
+
+_**Assistant**_
+
+
+
+I'll explain the flow of data and where we need to update the variable name change from `total_interest_paid` to `total_purchase_costs`:
+
+```python
+# 1. Data Flow: calculator.py -> app.py -> JavaScript -> HTML
+# The data flows from the backend calculation to the frontend display
+
+# 2. In calculator.py (ALREADY CHANGED):
+class ScenarioResults:
+    # You already changed this
+    total_purchase_costs: float  # Was previously total_interest_paid
+    
+    def __post_init__(self):
+        # Need to update here too
+        self.total_purchase_costs = self.total_purchase_costs or 0.0  # Was previously total_interest_paid
+
+# 3. In calculate_buy_scenario function (calculator.py):
+def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> ScenarioResults:
+    # Need to update here where the ScenarioResults is created
+    return ScenarioResults(
+        # ...other fields...
+        total_purchase_costs=total_interest + inputs.purchase_costs * inputs.house_cost,  # Was previously total_interest_paid
+        # ...other fields...
+    )
+
+# 4. In static/script.js:
+# Need to update all references in the JavaScript that display this value:
+
+# In updateResults function:
+function updateResults(results) {
+    # Update where the value is displayed in tables
+    additionalInfoTable.innerHTML = `
+        <tr>
+            <td>Total Purchase Costs</td>  # Was "Total Interest Paid"
+            <td class="text-end">-</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.total_purchase_costs)}</td>  # Was total_interest_paid
+            <td class="text-end">${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>  # Was total_interest_paid
+        </tr>
+    `;
+}
+
+# 5. In templates/index.html:
+# Update the static HTML template where this value is displayed:
+<tr>
+    <td>Total Purchase Costs</td>  # Was "Total Interest Paid"
+    <td class="text-end">-</td>
+    <td class="text-end"></td>
+    <td class="text-end"></td>
+</tr>
+
+# WHY we need to update each place:
+# 1. calculator.py: This is where the data structure is defined and where calculations happen
+# 2. app.py: No changes needed because it uses automatic serialization (asdict())
+# 3. static/script.js: This needs updating because it references the field name directly when displaying values
+# 4. templates/index.html: This needs updating for consistent labeling in the UI
+
+# The data flow is:
+calculator.py (ScenarioResults) 
+    -> app.py (converts to JSON) 
+        -> script.js (reads JSON and displays values) 
+            -> index.html (provides structure for display)
+```
+
+So you need to:
+1. ✅ Update the class definition in `calculator.py` (already done)
+2. ✅ Update the `__post_init__` method in `calculator.py` (already done)
+3. ✅ Update where `ScenarioResults` is created in `calculate_buy_scenario`
+4. Update all references in `script.js` where this value is displayed
+5. Update the labels in `index.html` for consistency
+
+The key is to follow the data flow from backend calculation to frontend display and update all places where the old variable name is referenced.
+
+---
+
+_**User**_
+
+I want an extra section under Input parameters in the HTML that says 'Explainer & Assumptions' and contains the below text formatted for readability. For variables that are used in the inputs/results, use special formatting.: This calculator compares the financial outcomes of renting versus buying a home by analyzing three scenarios:
+
+1 Continue renting
+2 Buy with minimum down payment (maximum mortgage)
+3 Buy using all available savings as down payment (minimum mortgage)
+
+Assumptions:
+
+- Investment returns: Any surplus money after expenses and housing costs is invested at the Investment Return Rate (use bank interest rate if not planning to invest)
+- Income and rent growth: Both disposable income (Monthly Savings + Current Rent) and rent payments increase annually with Consumer Price Inflation
+- Property appreciation: Home value grows according to the House Price Inflation Rate
+- Housing costs: Average Monthly Housing Cost calculates the mean rent/mortgage payment over your Time Horizon
+- Mortgage-free period: If Time Horizon exceeds Mortgage Term, the calculator accounts for years without mortgage payments
+
+---
+
+_**Assistant**_
+
+
+
+I'll help you add this explainer section to the HTML with proper formatting. We'll add it right after the main input parameters:
+
+```html:templates/index.html
+<!-- Add after the main input parameters but before Advanced Options -->
+<div class="form-group">
+    <label for="time_horizon_years">Time Horizon (Years)</label>
+    <input type="number" class="form-control" id="time_horizon_years" value="{{ config.DEFAULT_TIME_HORIZON_YEARS }}">
+</div>
+
+<!-- Add the new Explainer section here -->
+<div class="explainer-section mb-4">
+    <h5>Explainer & Assumptions</h5>
+    <div class="explainer-content">
+        <p>This calculator compares the financial outcomes of renting versus buying a home by analyzing three scenarios:</p>
+        
+        <ol>
+            <li>Continue renting</li>
+            <li>Buy with minimum down payment (maximum mortgage)</li>
+            <li>Buy using all available savings as down payment (minimum mortgage)</li>
+        </ol>
+
+        <h6 class="mt-4">Assumptions:</h6>
+        <ul class="assumptions-list">
+            <li>
+                <strong>Investment returns:</strong> Any surplus money after expenses and housing costs is invested at the 
+                <span class="variable-highlight">Investment Return Rate</span> (use bank interest rate if not planning to invest)
+            </li>
+            <li>
+                <strong>Income and rent growth:</strong> Both disposable income (<span class="variable-highlight">Monthly Savings</span> + 
+                <span class="variable-highlight">Current Rent</span>) and rent payments increase annually with 
+                <span class="variable-highlight">Consumer Price Inflation</span>
+            </li>
+            <li>
+                <strong>Property appreciation:</strong> Home value grows according to the 
+                <span class="variable-highlight">House Price Inflation Rate</span>
+            </li>
+            <li>
+                <strong>Housing costs:</strong> <span class="variable-highlight">Average Monthly Housing Cost</span> 
+                calculates the mean rent/mortgage payment over your <span class="variable-highlight">Time Horizon</span>
+            </li>
+            <li>
+                <strong>Mortgage-free period:</strong> If <span class="variable-highlight">Time Horizon</span> exceeds 
+                <span class="variable-highlight">Mortgage Term</span>, the calculator accounts for years without mortgage payments
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Then continue with Advanced Options -->
+<div class="accordion mb-3" id="advancedOptions">
+```
+
+And add this CSS to style the new section:
+
+```css:static/style.css
+/* Add these styles at the end of your CSS file */
+
+.explainer-section {
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.explainer-section h5 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.explainer-section h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.explainer-content {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.assumptions-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.assumptions-list li {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.assumptions-list li strong {
+    color: var(--text-primary);
+}
+
+.variable-highlight {
+    color: #6366f1;
+    font-weight: 500;
+    background: rgba(99, 102, 241, 0.1);
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .explainer-section {
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .explainer-content {
+        font-size: 0.9rem;
+    }
+}
+```
+
+This will:
+1. Add a new section with the explainer text
+2. Style it with a light background and proper spacing
+3. Highlight variables using a special format (purple text with light background)
+4. Make it responsive for mobile devices
+5. Keep
 
 ---
 

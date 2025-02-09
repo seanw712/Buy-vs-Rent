@@ -194,10 +194,10 @@ function updateResultsTable(results) {
             </thead>
             <tbody>
                 <tr>
-                    <td>Total Interest Paid</td>
+                    <td>Total Interest + Purchase Costs</td>
                     <td>-</td>
-                    <td>${formatCurrency(results.max_mortgage.total_interest_paid)}</td>
-                    <td>${formatCurrency(results.min_mortgage.total_interest_paid)}</td>
+                    <td>${formatCurrency(results.max_mortgage.total_purchase_costs)}</td>
+                    <td>${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>
                 </tr>
                 <tr>
                     <td>Total Rent Paid</td>
@@ -227,13 +227,22 @@ function getFormData() {
         monthly_savings_capacity: parseFloat(document.getElementById('monthly_savings_capacity').value),
         time_horizon_years: parseInt(document.getElementById('time_horizon_years').value),
         mortgage_term_years: parseInt(document.getElementById('mortgage_term_years').value),
-        min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100,  // Convert from percentage
-        house_purchase_fees_percent: parseFloat(document.getElementById('purchase_costs').value) / 100,  // Convert from percentage
-        house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,  // Convert from percentage
-        investment_return: parseFloat(document.getElementById('investment_return').value) / 100,  // Convert from percentage
-        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,  // Convert from percentage
-        cpi: parseFloat(document.getElementById('cpi').value) / 100  // Convert from percentage
+        min_down_payment_percent: parseFloat(document.getElementById('min_down_payment_percent').value) / 100,
+        house_purchase_fees_percent: parseFloat(document.getElementById('house_purchase_fees_percent').value) / 100,
+        house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,
+        investment_return: parseFloat(document.getElementById('investment_return').value) / 100,
+        mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,
+        cpi: parseFloat(document.getElementById('cpi').value) / 100
     };
+
+    // Validate all values are numbers
+    for (const [key, value] of Object.entries(formData)) {
+        if (isNaN(value)) {
+            console.error(`Invalid value for ${key}: ${value}`);
+            throw new Error(`Please enter a valid number for ${key}`);
+        }
+    }
+
     return formData;
 }
 
@@ -305,10 +314,10 @@ function updateResults(results) {
     const additionalInfoTable = document.querySelector('.additional-info .table tbody');
     additionalInfoTable.innerHTML = `
         <tr>
-            <td>Total Interest Paid</td>
+            <td>Total Interest + Purchase Costs</td>
             <td class="text-end">-</td>
-            <td class="text-end">${formatCurrency(results.max_mortgage.total_interest_paid)}</td>
-            <td class="text-end">${formatCurrency(results.min_mortgage.total_interest_paid)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.total_purchase_costs)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>
         </tr>
         <tr>
             <td>Total Rent Paid</td>
@@ -340,6 +349,9 @@ document.getElementById('calculatorForm').addEventListener('submit', async funct
         // Get form data
         const formData = getFormData();
         
+        // Debug log the form data
+        console.log('Sending form data:', formData);
+        
         // Send calculation request
         const response = await fetch('/calculate', {
             method: 'POST',
@@ -349,8 +361,16 @@ document.getElementById('calculatorForm').addEventListener('submit', async funct
             body: JSON.stringify(formData)
         });
 
+        // Log the raw response
+        console.log('Raw response:', response);
+
         const results = await response.json();
+        
+        // Log the parsed results
+        console.log('Parsed results:', results);
+
         if (results.error) {
+            console.error('Server returned error:', results.error);
             alert('Calculation error: ' + results.error);
             document.getElementById('loadingSpinner').style.display = 'none';
             return;
@@ -360,7 +380,8 @@ document.getElementById('calculatorForm').addEventListener('submit', async funct
         updateResults(results);
         
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Detailed error:', error);
+        console.error('Error stack:', error.stack);
         alert('An error occurred while calculating results. Please check the console for details.');
         document.getElementById('loadingSpinner').style.display = 'none';
     }

@@ -102,7 +102,7 @@ class ScenarioResults:
         monthly_investment_value (float): Future value of monthly investments.
         house_value (float): Future value of the house (if applicable).
         remaining_mortgage (float): Remaining mortgage principal (if applicable).
-        total_interest_paid (float): Total interest paid on mortgage (if applicable).
+        total_purchase_costs (float): Total interest paid + purchase costs (if applicable).
         total_rent_paid (float): Total rent paid over time (if applicable).
         monthly_mortgage_min (float): Minimum monthly mortgage payment.
         monthly_mortgage_max (float): Maximum monthly mortgage payment.
@@ -111,7 +111,7 @@ class ScenarioResults:
     monthly_investment_value: float = 0.0
     house_value: float = 0.0
     remaining_mortgage: float = 0.0
-    total_interest_paid: float = 0.0
+    total_purchase_costs: float = 0.0
     total_rent_paid: float = 0.0
     monthly_mortgage_min: float = 0.0
     monthly_mortgage_max: float = 0.0
@@ -122,7 +122,7 @@ class ScenarioResults:
         self.monthly_investment_value = self.monthly_investment_value or 0.0
         self.house_value = self.house_value or 0.0
         self.remaining_mortgage = self.remaining_mortgage or 0.0
-        self.total_interest_paid = self.total_interest_paid or 0.0
+        self.total_purchase_costs = self.total_purchase_costs or 0.0
         self.total_rent_paid = self.total_rent_paid or 0.0
         self.monthly_mortgage_min = self.monthly_mortgage_min or 0.0
         self.monthly_mortgage_max = self.monthly_mortgage_max or 0.0
@@ -303,7 +303,7 @@ def calculate_rent_scenario(inputs: ScenarioInputs) -> ScenarioResults:
     return ScenarioResults(
         principal_investment_value=principal_growth,
         monthly_investment_value=monthly_growth,
-        total_rent_paid=total_rent
+        total_rent_paid=total_rent 
     )
 
 def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> ScenarioResults:
@@ -366,7 +366,7 @@ def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> Scenari
         monthly_investment_value=monthly_growth,
         house_value=future_house_value,
         remaining_mortgage=remaining_mortgage,
-        total_interest_paid=total_interest,
+        total_purchase_costs=total_interest + inputs.purchase_costs * inputs.house_cost,
         monthly_mortgage_min=min_monthly_payment,
         monthly_mortgage_max=max_monthly_payment
     )

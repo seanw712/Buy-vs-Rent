@@ -41,6 +41,45 @@
                             <input type="number" class="form-control" id="time_horizon_years" value="{{ config.DEFAULT_TIME_HORIZON_YEARS }}">
                         </div>
                         
+                        <!-- Add the new Explainer section here -->
+                        <div class="explainer-section mb-4">
+                            <h5>Explainer & Assumptions</h5>
+                            <div class="explainer-content">
+                                <p>This calculator compares the financial outcomes of renting versus buying a home by analyzing three scenarios:</p>
+                                
+                                <ol>
+                                    <li>Continue renting</li>
+                                    <li>Buy with minimum down payment (maximum mortgage)</li>
+                                    <li>Buy using all available savings as down payment (minimum mortgage)</li>
+                                </ol>
+
+                                <h6 class="mt-4">Assumptions:</h6>
+                                <ul class="assumptions-list">
+                                    <li>
+                                        <strong>Investment returns:</strong> Any surplus money after expenses and housing costs is invested at the 
+                                        <span class="variable-highlight">Investment Return Rate</span> (use bank interest rate if not planning to invest)
+                                    </li>
+                                    <li>
+                                        <strong>Income and rent growth:</strong> Both disposable income (<span class="variable-highlight">Monthly Savings</span> + 
+                                        <span class="variable-highlight">Current Rent</span>) and rent payments increase annually with 
+                                        <span class="variable-highlight">Consumer Price Inflation</span>
+                                    </li>
+                                    <li>
+                                        <strong>Property appreciation:</strong> Home value grows according to the 
+                                        <span class="variable-highlight">House Price Inflation Rate</span>
+                                    </li>
+                                    <li>
+                                        <strong>Housing costs:</strong> <span class="variable-highlight">Average Monthly Housing Cost</span> 
+                                        calculates the mean rent/mortgage payment over your <span class="variable-highlight">Time Horizon</span>
+                                    </li>
+                                    <li>
+                                        <strong>Mortgage-free period:</strong> If <span class="variable-highlight">Time Horizon</span> exceeds 
+                                        <span class="variable-highlight">Mortgage Term</span>, the calculator accounts for years without mortgage payments
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
                         <div class="accordion mb-3" id="advancedOptions">
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
@@ -59,7 +98,8 @@
                                             <input type="number" class="form-control" id="min_down_payment_percent" value="15" min="0" max="100" step="1" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="house_purchase_fees_percent">Notary fees etc. associated with buying a house (%)</label>
+                                            <label for="house_purchase_fees_percent">Purchase Costs (%)</label>
+                                            <small class="form-text text-muted d-block mb-2">Notary fees etc. associated with buying a house</small>
                                             <input type="number" class="form-control" id="house_purchase_fees_percent" value="7" min="0" max="20" step="1" required>
                                         </div>
                                         <div class="form-group">
@@ -154,7 +194,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>Total Interest Paid</td>
+                                            <td>Total Interest + Purchase Costs</td>
                                             <td class="text-end">-</td>
                                             <td class="text-end"></td>
                                             <td class="text-end"></td>
