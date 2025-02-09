@@ -195,7 +195,7 @@ function updateResultsTable(results) {
                     <td>-</td>
                 </tr>
                 <tr>
-                    <td>Average Monthly Housing Cost</td>
+                    <td>Monthly Housing Cost</td>
                     <td>${formatCurrency(results.rent.total_rent_paid / (getFormData().time_horizon_years * 12))}</td>
                     <td>${formatCurrency(results.max_mortgage.monthly_mortgage_max)}</td>
                     <td>${formatCurrency(results.min_mortgage.monthly_mortgage_min)}</td>
@@ -309,7 +309,7 @@ function updateResults(results) {
             <td class="text-end">-</td>
         </tr>
         <tr>
-            <td><strong>Average Monthly Housing Cost</strong></td>
+            <td><strong>Monthly Housing Cost</strong></td>
             <td class="text-end">${formatCurrency(results.rent.total_rent_paid / (getFormData().time_horizon_years * 12))}</td>
             <td class="text-end">${formatCurrency(results.max_mortgage.monthly_mortgage_max)}</td>
             <td class="text-end">${formatCurrency(results.min_mortgage.monthly_mortgage_min)}</td>

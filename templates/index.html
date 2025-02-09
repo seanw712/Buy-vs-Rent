@@ -67,26 +67,28 @@
                     <h5>Input Parameters</h5>
                     <form id="calculatorForm">
                         <div class="form-group">
-                            <label for="initial_savings">Initial Savings (€)</label>
+                            <label for="initial_savings">Initial Savings (€/$)</label>
                             <small class="form-text text-muted d-block mb-2">Your current total savings that you are comfortable investing (house or investments)</small>
                             <input type="number" class="form-control" id="initial_savings" value="{{ config.DEFAULT_INITIAL_SAVINGS }}" required>
                         </div>
                         <div class="form-group">
-                            <label for="house_cost">House Cost (€)</label>
-                            <small class="form-text text-muted d-block mb-2">Your share of the house price, if you will be buying a house together.</small>
+                            <label for="house_cost">House Cost (€/$)</label>
+                            <small class="form-text text-muted d-block mb-2">Your share of the house price. 100% if you are buying alone.</small>
                             <input type="number" class="form-control" id="house_cost" value="{{ config.DEFAULT_HOUSE_COST }}" required>
                         </div>
                         <div class="form-group">
-                            <label for="monthly_rent">Rent/Month (€)</label>
+                            <label for="monthly_rent">Rent/Month (€/$)</label>
+                            <small class="form-text text-muted d-block mb-2">Your current monthly rent payment. </small>
                             <input type="number" class="form-control" id="monthly_rent" value="{{ config.DEFAULT_MONTHLY_RENT }}" required>
                         </div>
                         <div class="form-group">
-                            <label for="monthly_savings_capacity">Monthly Savings (€)</label>
-                            <small class="form-text text-muted d-block mb-2">Remaining income after all expenses and rent, available for investing.</small>
+                            <label for="monthly_savings_capacity">Monthly Savings (€/$)</label>
+                            <small class="form-text text-muted d-block mb-2">Remaining income after all expenses and rent, available for savings.</small>
                             <input type="number" class="form-control" id="monthly_savings_capacity" value="{{ config.DEFAULT_MONTHLY_SAVINGS_CAPACITY}}" required>
                         </div>
                         <div class="form-group">
                             <label for="time_horizon_years">Time Horizon (Years)</label>
+                            <small class="form-text text-muted d-block mb-2">How far in the future you want to calculate the results. Should be at least your mortgage term.</small>
                             <input type="number" class="form-control" id="time_horizon_years" value="{{ config.DEFAULT_TIME_HORIZON_YEARS }}">
                         </div>
                         
@@ -101,23 +103,27 @@
                                     <div class="accordion-body">
                                         <div class="form-group">
                                             <label for="mortgage_term_years">Mortgage Term (Years)</label>
+                                            <small class="form-text text-muted d-block mb-2">The length of the mortgage loan. A range of 15-30 years is common.</small>
                                             <input type="number" class="form-control" id="mortgage_term_years" value="{{ config.DEFAULT_MORTGAGE_TERM_YEARS }}">
                                         </div>
                                         <div class="form-group">
                                             <label for="min_down_payment_percent">Minimum Down Payment (%)</label>
+                                            <small class="form-text text-muted d-block mb-2">The minimum down payment required for a mortgage. A range of 10-20% is common.</small>
                                             <input type="number" class="form-control" id="min_down_payment_percent" value="15" min="0" max="100" step="1" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="house_purchase_fees_percent">Purchase Costs (%)</label>
-                                            <small class="form-text text-muted d-block mb-2">Notary fees etc. associated with buying a house</small>
+                                            <small class="form-text text-muted d-block mb-2">Notary fees etc. associated with buying a house. A range of 5-10% is common.</small>
                                             <input type="number" class="form-control" id="house_purchase_fees_percent" value="7" min="0" max="20" step="1" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="house_inflation">House Price Inflation Rate (%)</label>
+                                            <small class="form-text text-muted d-block mb-2">The inflation rate of the house price. Average increase rate over the last 30 years is 3.5% for US</small>
                                             <input type="number" class="form-control" id="house_inflation" value="{{ config.DEFAULT_HOUSE_PRICE_INFLATION * 100 }}" step="0.1">
                                         </div>
                                         <div class="form-group">
                                             <label for="investment_return">Investment Return Rate (%)</label>
+                                            <small class="form-text text-muted d-block mb-2">Your expected yearly return on your investments. Average over last 30 years is 9% for US</small>
                                             <input type="number" class="form-control" id="investment_return" value="{{ config.DEFAULT_INVESTMENT_RETURN * 100 }}" step="0.1">
                                         </div>
                                         <div class="form-group">
@@ -126,6 +132,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="cpi">Consumer Price Inflation (%)</label>
+                                            <small class="form-text text-muted d-block mb-2">The inflation rate of the goods and services you consume. Average yearly inflation rate over the last 30 years is 2.5% for US</small>
                                             <input type="number" class="form-control" id="cpi" value="{{ config.DEFAULT_CPI * 100 }}" step="0.1">
                                         </div>
                                     </div>
@@ -185,7 +192,7 @@
                             </div>
                         </div>
                         <div class="additional-info mt-4 mb-4">
-                            <h5>Additional Information</h5>
+                            <h5>Extra Information</h5>
                             <div class="table-container">
                                 <table class="table">
                                     <thead>
@@ -204,13 +211,13 @@
                                             <td class="text-end"></td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Total Rent Paid</strong></td>
+                                            <td><strong>Total Rent Costs</strong></td>
                                             <td class="text-end"></td>
                                             <td class="text-end">-</td>
                                             <td class="text-end">-</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Average Monthly Housing Cost</strong></td>
+                                            <td><strong>Monthly Housing Cost</strong></td>
                                             <td class="text-end"></td>
                                             <td class="text-end"></td>
                                             <td class="text-end"></td>
