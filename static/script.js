@@ -1,6 +1,42 @@
 // Global chart instance
 let netWorthChart = null;
 
+// Cache form data in localStorage
+function saveFormDataToCache() {
+    const formData = {};
+    const inputs = document.querySelectorAll('#calculatorForm input[type="number"]');
+    inputs.forEach(input => {
+        formData[input.id] = input.value;
+    });
+    localStorage.setItem('calculatorFormData', JSON.stringify(formData));
+}
+
+// Load form data from cache
+function loadFormDataFromCache() {
+    const cachedData = localStorage.getItem('calculatorFormData');
+    if (cachedData) {
+        const formData = JSON.parse(cachedData);
+        Object.entries(formData).forEach(([id, value]) => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.value = value;
+            }
+        });
+    }
+}
+
+// Add event listeners for input changes
+document.addEventListener('DOMContentLoaded', function() {
+    // Load cached data when page loads
+    loadFormDataFromCache();
+    
+    // Add change event listeners to all number inputs
+    const inputs = document.querySelectorAll('#calculatorForm input[type="number"]');
+    inputs.forEach(input => {
+        input.addEventListener('change', saveFormDataToCache);
+    });
+});
+
 // Format currency values
 function formatCurrency(value) {
     // Handle invalid values
