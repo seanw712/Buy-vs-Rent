@@ -736,6 +736,287 @@ Now change the label 'Inflation-adjusted' to Adjusted for Inflation
 
 ---
 
+_**Assistant**_
+
+
+
+I'll update the inflation-adjusted label in the table:
+
+---
+
+_**Assistant**_
+
+```
+        <tr class="table-primary">
+            <th><strong class="net-worth-label">Net Worth after ${timeHorizon} years</strong></th>
+            <td class="text-end">${formatCurrency(results.rent.net_worth)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.net_worth)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.net_worth)}</td>
+        </tr>
+        <tr>
+            <td><strong>(Adjusted for Inflation)</strong></td>
+            <td class="text-end">${formatCurrency(results.rent.net_worth * inflationFactor)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.net_worth * inflationFactor)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.net_worth * inflationFactor)}</td>
+        </tr>
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've updated the label from "(Inflation-adjusted)" to "(Adjusted for Inflation)". The new wording is more natural and clearer while maintaining the parentheses to show it's related to the net worth value above it. All functionality remains the same.
+
+---
+
+_**User**_
+
+If the calculated monthly savings growth is negative, I want an error shown that says 'Error: You can't afford the required mortgage payment with your current income'.
+
+---
+
+_**Assistant**_
+
+
+
+I'll add a validation check for negative monthly savings growth and display an error message when this occurs. I'll modify the `updateResults` function:
+
+---
+
+_**Assistant**_
+
+```
+// Update results in the UI
+function updateResults(results) {
+    // Check for negative monthly savings growth in mortgage scenarios
+    if (results.max_mortgage.monthly_investment_value < 0 || results.min_mortgage.monthly_investment_value < 0) {
+        alert("Error: You can't afford the required mortgage payment with your current income");
+        document.getElementById('loadingSpinner').style.display = 'none';
+        return;
+    }
+
+    // Debug logging for net worth values
+    console.log('Rent scenario:', {
+        net_worth: results.rent.net_worth,
+        principal: results.rent.principal_investment_value,
+        monthly: results.rent.monthly_investment_value,
+        house: results.rent.house_value,
+        mortgage: results.rent.remaining_mortgage
+    });
+// ... rest of existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+I've added a check at the beginning of the `updateResults` function that:
+
+1. Checks if either the max mortgage or min mortgage scenarios have negative monthly investment growth
+2. If true, it means the mortgage payments are higher than the user's monthly savings capacity
+3. Shows an error message: "Error: You can't afford the required mortgage payment with your current income"
+4. Hides the loading spinner
+5. Returns early to prevent displaying invalid results
+
+This will help users understand immediately if their income is insufficient for the mortgage scenarios they're considering. The error appears as soon as the calculation is complete, before any results are displayed.
+
+Would you like me to modify the error handling in any way, such as:
+1. Using a different style of error message?
+2. Adding more specific details about the shortfall?
+3. Adding suggestions for what parameters to adjust?
+
+---
+
+_**User**_
+
+Improve the error message for clarity & tell the user what to change to make it work (lower house price / longer mortgate term )
+
+---
+
+_**Assistant**_
+
+
+
+I'll improve the error message to be more informative and provide actionable suggestions:
+
+---
+
+_**Assistant**_
+
+```
+// Update results in the UI
+function updateResults(results) {
+    // Check for negative monthly savings growth in mortgage scenarios
+    if (results.max_mortgage.monthly_investment_value < 0 || results.min_mortgage.monthly_investment_value < 0) {
+        const message = `Error: The mortgage payment would exceed your monthly savings capacity.
+
+To make this work, you could:
+• Lower the house price
+• Extend the mortgage term
+• Increase your down payment
+• Find a lower mortgage interest rate`;
+
+        alert(message);
+        document.getElementById('loadingSpinner').style.display = 'none';
+        return;
+    }
+
+    // Debug logging for net worth values
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+
+
+
+
+I've updated the error message to:
+
+1. Clearly explain the problem: "The mortgage payment would exceed your monthly savings capacity"
+2. Provide a list of actionable solutions that the user can try:
+   - Lower the house price
+   - Extend the mortgage term
+   - Increase their down payment
+   - Find a lower mortgage interest rate
+
+The message is formatted with bullet points for better readability and presents multiple options for the user to consider. Each suggestion corresponds to a parameter they can adjust in the calculator to potentially make their scenario work.
+
+Would you like me to:
+1. Add more specific suggestions?
+2. Change the formatting of the message?
+3. Add any additional details about why the calculation failed?
+
+---
+
+_**User**_
+
+Create a similar error message when the downpayment is insufficiently covered with your savings
+
+---
+
+_**Assistant**_
+
+
+
+I'll add a check for insufficient down payment and create a similar error message. We should check this before checking the monthly savings capacity:
+
+---
+
+_**Assistant**_
+
+```
+// Update results in the UI
+function updateResults(results) {
+    // Check if initial savings can cover the minimum down payment
+    const formData = getFormData();
+    const totalHouseCost = formData.house_cost * (1 + formData.house_purchase_fees_percent);
+    const minDownPaymentRequired = totalHouseCost * formData.min_down_payment_percent;
+    
+    if (formData.initial_savings < minDownPaymentRequired) {
+        const shortfall = formatCurrency(minDownPaymentRequired - formData.initial_savings);
+        const message = `Error: Your initial savings are insufficient for the minimum down payment.
+
+Required down payment: ${formatCurrency(minDownPaymentRequired)}
+Your savings: ${formatCurrency(formData.initial_savings)}
+Shortfall: ${shortfall}
+
+To make this work, you could:
+• Increase your initial savings
+• Lower the house price
+• Find a mortgage with a lower down payment requirement`;
+
+        alert(message);
+        document.getElementById('loadingSpinner').style.display = 'none';
+        return;
+    }
+
+    // Check for negative monthly savings growth in mortgage scenarios
+    if (results.max_mortgage.monthly_investment_value < 0 || results.min_mortgage.monthly_investment_value < 0) {
+        const message = `Error: The mortgage payment would exceed your monthly savings capacity.
+
+To make this work, you could:
+• Lower the house price
+• Extend the mortgage term
+• Increase your down payment
+• Find a lower mortgage interest rate`;
+
+        alert(message);
+        document.getElementById('loadingSpinner').style.display = 'none';
+        return;
+    }
+
+    // Debug logging for net worth values
+```
+
+---
+
+_**Assistant**_
+
+
+
+
+
+
+
+
+
+
+
+I've added a new check that:
+
+1. Calculates the total house cost including purchase fees
+2. Calculates the minimum down payment required
+3. Compares it with the user's initial savings
+4. If savings are insufficient, shows an error message that includes:
+   - The required down payment amount
+   - The user's current savings
+   - The shortfall amount (how much more they need)
+   - Three actionable suggestions to resolve the issue:
+     - Increase initial savings
+     - Lower the house price
+     - Find a mortgage with a lower down payment requirement
+
+The error message is formatted similarly to the monthly payment error, but includes specific numbers to help users understand exactly how much more they need to save or how much they need to adjust other parameters.
+
+Would you like me to:
+1. Add more details to the error message?
+2. Change the formatting?
+3. Add any other suggestions for resolving the issue?
+
+---
+
+_**User**_
+
+I don't see this message, but the Inputvalidation message instead.
+
+---
+
+_**Assistant**_
+
+
+
+---
+
 
 
 ---

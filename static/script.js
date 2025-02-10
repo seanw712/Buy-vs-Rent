@@ -288,6 +288,44 @@ function getFormData() {
 
 // Update results in the UI
 function updateResults(results) {
+    // Check if initial savings can cover the minimum down payment
+    const formData = getFormData();
+    const totalHouseCost = formData.house_cost * (1 + formData.house_purchase_fees_percent);
+    const minDownPaymentRequired = totalHouseCost * formData.min_down_payment_percent;
+    
+    if (formData.initial_savings < minDownPaymentRequired) {
+        const shortfall = formatCurrency(minDownPaymentRequired - formData.initial_savings);
+        const message = `Error: Your initial savings are insufficient for the minimum down payment.
+
+Required down payment: ${formatCurrency(minDownPaymentRequired)}
+Your savings: ${formatCurrency(formData.initial_savings)}
+Shortfall: ${shortfall}
+
+To make this work, you could:
+• Increase your initial savings
+• Lower the house price
+• Find a mortgage with a lower down payment requirement`;
+
+        alert(message);
+        document.getElementById('loadingSpinner').style.display = 'none';
+        return;
+    }
+
+    // Check for negative monthly savings growth in mortgage scenarios
+    if (results.max_mortgage.monthly_investment_value < 0 || results.min_mortgage.monthly_investment_value < 0) {
+        const message = `Error: The mortgage payment would exceed your monthly savings capacity.
+
+To make this work, you could:
+• Lower the house price
+• Extend the mortgage term
+• Increase your down payment
+• Find a lower mortgage interest rate`;
+
+        alert(message);
+        document.getElementById('loadingSpinner').style.display = 'none';
+        return;
+    }
+
     // Debug logging for net worth values
     console.log('Rent scenario:', {
         net_worth: results.rent.net_worth,
@@ -390,13 +428,34 @@ function updateResults(results) {
 document.getElementById('calculatorForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    // Show loading spinner and hide results
-    document.getElementById('loadingSpinner').style.display = 'block';
-    document.getElementById('resultsArea').style.display = 'none';
-    
     try {
         // Get form data
         const formData = getFormData();
+        
+        // Check if initial savings can cover the minimum down payment
+        const totalHouseCost = formData.house_cost * (1 + formData.house_purchase_fees_percent);
+        const minDownPaymentRequired = totalHouseCost * formData.min_down_payment_percent;
+        
+        if (formData.initial_savings < minDownPaymentRequired) {
+            const shortfall = formatCurrency(minDownPaymentRequired - formData.initial_savings);
+            const message = `Error: Your initial savings are insufficient for the minimum down payment.
+
+Required down payment: ${formatCurrency(minDownPaymentRequired)}
+Your savings: ${formatCurrency(formData.initial_savings)}
+Shortfall: ${shortfall}
+
+To make this work, you could:
+• Increase your initial savings
+• Lower the house price
+• Find a mortgage with a lower down payment requirement`;
+
+            alert(message);
+            return;
+        }
+        
+        // Show loading spinner and hide results
+        document.getElementById('loadingSpinner').style.display = 'block';
+        document.getElementById('resultsArea').style.display = 'none';
         
         // Debug log the form data
         console.log('Sending form data:', formData);
