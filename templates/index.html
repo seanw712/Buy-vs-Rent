@@ -26,10 +26,12 @@
                                 <p>This calculator compares the financial outcomes of renting versus buying a home by analyzing three scenarios:</p>
                                 
                                 <ol>
-                                    <li>Continue renting</li>
-                                    <li>Buy with minimum down payment (maximum mortgage)</li>
-                                    <li>Buy using all available savings as down payment (minimum mortgage)</li>
+                                    <li>Continue renting & Invest what's left</li>
+                                    <li>Buy with minimum down payment (maximum mortgage) & Invest what's left</li>
+                                    <li>Buy using all available savings as down payment (minimum mortgage) & Invest what's left</li>
                                 </ol>
+
+                                <p>Due to inflation, money in the future has less purchasing power than today's money. The calculator shows both nominal net worth (future money) and inflation-adjusted net worth (equivalent in today's purchasing power). For example, €1,000,000 in 30 years might only have the purchasing power of €550,000 in today's money.</p>
 
                                 <h6 class="mt-4">Assumptions:</h6>
                                 <ul class="assumptions-list">
@@ -73,7 +75,7 @@
                         </div>
                         <div class="form-group">
                             <label for="house_cost">House Cost (€/$)</label>
-                            <small class="form-text text-muted d-block mb-2">Your share of the house price. 100% if you are buying alone.</small>
+                            <small class="form-text text-muted d-block mb-2">Your share of the house price. This is the full house price excl. purchase costs if you are buying alone.</small>
                             <input type="number" class="form-control" id="house_cost" value="{{ config.DEFAULT_HOUSE_COST }}" required>
                         </div>
                         <div class="form-group">
@@ -158,8 +160,8 @@
                                         <tr>
                                             <th></th>
                                             <th>Rent + Invest</th>
-                                            <th>Max Mortgage</th>
-                                            <th>Min Mortgage</th>
+                                            <th>Max. Mortgage + Invest</th>
+                                            <th>Min. Mortgage + Invest</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -199,8 +201,8 @@
                                         <tr>
                                             <th></th>
                                             <th>Rent + Invest</th>
-                                            <th>Max Mortgage</th>
-                                            <th>Min Mortgage</th>
+                                            <th>Max. Mortgage + Invest</th>
+                                            <th>Min. Mortgage + Invest</th>
                                         </tr>
                                     </thead>
                                     <tbody>

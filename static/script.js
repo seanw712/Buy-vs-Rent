@@ -79,7 +79,7 @@ function updateChart(results) {
     
     // Prepare data
     const data = {
-        labels: ['Rent + Invest', 'Max Mortgage', 'Min Mortgage'],
+        labels: ['Rent + Invest', 'Max. Mortgage + Invest', 'Min. Mortgage + Invest'],
         datasets: [
             {
                 label: 'Growth of Initial Savings',
@@ -320,6 +320,12 @@ function updateResults(results) {
     
     // Update Net Worth Summary Table
     const netWorthTable = document.querySelector('.net-worth-summary .table tbody');
+    const timeHorizon = document.getElementById('time_horizon_years').value;
+    const cpi = parseFloat(document.getElementById('cpi').value) / 100;
+    
+    // Calculate inflation adjustment factor
+    const inflationFactor = 1 / Math.pow(1 + cpi, timeHorizon);
+    
     netWorthTable.innerHTML = `
         <tr>
             <td><strong>Growth of Initial Savings</strong></td>
@@ -340,10 +346,16 @@ function updateResults(results) {
             <td class="text-end">${formatCurrency(results.min_mortgage.house_value)}</td>
         </tr>
         <tr class="table-primary">
-            <th><strong class="net-worth-label">Net Worth after ${document.getElementById('time_horizon_years').value} years</strong></th>
+            <th><strong class="net-worth-label">Net Worth after ${timeHorizon} years</strong></th>
             <td class="text-end">${formatCurrency(results.rent.net_worth)}</td>
             <td class="text-end">${formatCurrency(results.max_mortgage.net_worth)}</td>
             <td class="text-end">${formatCurrency(results.min_mortgage.net_worth)}</td>
+        </tr>
+        <tr>
+            <td><strong>(Adjusted for Inflation)</strong></td>
+            <td class="text-end">${formatCurrency(results.rent.net_worth * inflationFactor)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.net_worth * inflationFactor)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.net_worth * inflationFactor)}</td>
         </tr>
     `;
     
