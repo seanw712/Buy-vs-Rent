@@ -272,6 +272,7 @@ function getFormData() {
         house_inflation: parseFloat(document.getElementById('house_inflation').value) / 100,
         investment_return: parseFloat(document.getElementById('investment_return').value) / 100,
         mortgage_rate: parseFloat(document.getElementById('mortgage_rate').value) / 100,
+        min_mortgage_rate: parseFloat(document.getElementById('min_mortgage_rate').value) / 100,
         cpi: parseFloat(document.getElementById('cpi').value) / 100
     };
 
@@ -422,6 +423,9 @@ To make this work, you could:
     
     // Update chart
     updateChart(results);
+
+    // Scroll to results section
+    document.querySelector('.results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // Handle form submission

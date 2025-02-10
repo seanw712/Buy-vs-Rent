@@ -17,6 +17,7 @@ class ScenarioInputs:
     house_inflation: float = cfg.DEFAULT_HOUSE_PRICE_INFLATION
     investment_return: float = cfg.DEFAULT_INVESTMENT_RETURN
     mortgage_rate: float = cfg.DEFAULT_MORTGAGE_RATE
+    min_mortgage_rate: float = 0.025  # Default 2.5% for minimum mortgage scenario
     min_down_payment_percent: float = cfg.DEFAULT_MIN_DOWN_PAYMENT_PERCENT
     cpi: float = cfg.DEFAULT_CPI  # Consumer Price Index for income and rent growth
 
@@ -41,6 +42,7 @@ class ScenarioInputs:
         self.house_inflation = float(self.house_inflation)
         self.investment_return = float(self.investment_return)
         self.mortgage_rate = float(self.mortgage_rate)
+        self.min_mortgage_rate = float(self.min_mortgage_rate)
         self.min_down_payment_percent = float(self.min_down_payment_percent)
         self.cpi = float(self.cpi)
         
@@ -69,6 +71,8 @@ class ScenarioInputs:
             raise ValueError("Investment return rate cannot be negative.")
         if self.mortgage_rate < 0:
             raise ValueError("Mortgage rate cannot be negative.")
+        if self.min_mortgage_rate < 0:
+            raise ValueError("Minimum mortgage rate cannot be negative.")
         if self.cpi < 0:
             raise ValueError("CPI cannot be negative.")
         
@@ -79,6 +83,8 @@ class ScenarioInputs:
             raise ValueError("Investment return rate unrealistically high (>20%).")
         if self.mortgage_rate > 0.2:
             raise ValueError("Mortgage rate unrealistically high (>20%).")
+        if self.min_mortgage_rate > 0.2:
+            raise ValueError("Minimum mortgage rate unrealistically high (>20%).")
         if self.cpi > 0.2:
             raise ValueError("CPI unrealistically high (>20%).")
         
@@ -315,29 +321,23 @@ def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> Scenari
     max_mortgage_amount = total_house_cost * (1 - inputs.min_down_payment_percent)
     min_mortgage_amount = min(total_house_cost - inputs.initial_savings, max_mortgage_amount)
     
-    # Calculate monthly payments for both scenarios
-    max_monthly_payment = calculate_mortgage_payment(
-        principal=max_mortgage_amount,
-        annual_rate=inputs.mortgage_rate,
-        years=inputs.mortgage_term_years
-    )
-    
-    min_monthly_payment = calculate_mortgage_payment(
-        principal=min_mortgage_amount,
-        annual_rate=inputs.mortgage_rate,
-        years=inputs.mortgage_term_years
-    )
-    
     # Select current scenario's values
     mortgage_amount = max_mortgage_amount if max_mortgage else min_mortgage_amount
-    monthly_payment = max_monthly_payment if max_mortgage else min_monthly_payment
     down_payment = min(inputs.initial_savings, total_house_cost - mortgage_amount)
+    mortgage_rate = inputs.mortgage_rate if max_mortgage else inputs.min_mortgage_rate
     
-    # Calculate remaining mortgage and total interest
+    # Calculate monthly payment using appropriate rate for this scenario
+    monthly_payment = calculate_mortgage_payment(
+        principal=mortgage_amount,
+        annual_rate=mortgage_rate,  # Use selected rate
+        years=inputs.mortgage_term_years
+    )
+    
+    # Calculate remaining mortgage and total interest with appropriate rate
     remaining_mortgage, total_interest = calculate_remaining_mortgage(
         principal=mortgage_amount,
         payment=monthly_payment,
-        annual_rate=inputs.mortgage_rate,
+        annual_rate=mortgage_rate,  # Use selected rate
         years_elapsed=min(inputs.time_horizon_years, inputs.mortgage_term_years)
     )
     
@@ -361,14 +361,27 @@ def calculate_buy_scenario(inputs: ScenarioInputs, max_mortgage=True) -> Scenari
         is_fixed_housing_cost=True
     )
     
+    # Calculate max and min monthly payments for display
+    max_monthly = calculate_mortgage_payment(
+        principal=max_mortgage_amount,
+        annual_rate=inputs.mortgage_rate,
+        years=inputs.mortgage_term_years
+    )
+    
+    min_monthly = calculate_mortgage_payment(
+        principal=min_mortgage_amount,
+        annual_rate=inputs.min_mortgage_rate,  # Use min rate for min mortgage
+        years=inputs.mortgage_term_years
+    )
+    
     return ScenarioResults(
         principal_investment_value=principal_growth,
         monthly_investment_value=monthly_growth,
         house_value=future_house_value,
         remaining_mortgage=remaining_mortgage,
         total_purchase_costs=total_interest + inputs.purchase_costs * inputs.house_cost,
-        monthly_mortgage_min=min_monthly_payment,
-        monthly_mortgage_max=max_monthly_payment
+        monthly_mortgage_min=min_monthly,
+        monthly_mortgage_max=max_monthly
     )
 
 def compare_scenarios(inputs: ScenarioInputs) -> Dict[str, ScenarioResults]:

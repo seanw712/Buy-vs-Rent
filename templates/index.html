@@ -133,6 +133,11 @@
                                             <input type="number" class="form-control" id="mortgage_rate" value="{{ config.DEFAULT_MORTGAGE_RATE * 100 }}" step="0.1">
                                         </div>
                                         <div class="form-group">
+                                            <label for="min_mortgage_rate">Min. Mortgage Interest Rate (%)</label>
+                                            <small class="form-text text-muted d-block mb-2">Interest rate for minimum mortgage scenario (often lower due to higher down payment)</small>
+                                            <input type="number" class="form-control" id="min_mortgage_rate" value="2.5" step="0.1">
+                                        </div>
+                                        <div class="form-group">
                                             <label for="cpi">Consumer Price Inflation (%)</label>
                                             <small class="form-text text-muted d-block mb-2">The inflation rate of the goods and services you consume. Average yearly inflation rate over the last 30 years is 2.5% for US.</small>
                                             <input type="number" class="form-control" id="cpi" value="{{ config.DEFAULT_CPI * 100 }}" step="0.1">

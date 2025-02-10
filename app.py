@@ -33,6 +33,7 @@ def calculate():
             house_inflation=float(data.get('house_inflation', cfg.DEFAULT_HOUSE_PRICE_INFLATION)),
             investment_return=float(data.get('investment_return', cfg.DEFAULT_INVESTMENT_RETURN)),
             mortgage_rate=float(data.get('mortgage_rate', cfg.DEFAULT_MORTGAGE_RATE)),
+            min_mortgage_rate=float(data.get('min_mortgage_rate', 0.025)),
             min_down_payment_percent=float(data.get('min_down_payment_percent', cfg.DEFAULT_MIN_DOWN_PAYMENT_PERCENT)),
             cpi=float(data.get('cpi', cfg.DEFAULT_CPI))
         )
