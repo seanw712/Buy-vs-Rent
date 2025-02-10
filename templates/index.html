@@ -69,22 +69,22 @@
                     <h5>Input Parameters</h5>
                     <form id="calculatorForm">
                         <div class="form-group">
-                            <label for="initial_savings">Initial Savings (€/$)</label>
+                            <label for="initial_savings">Initial Savings (€)</label>
                             <small class="form-text text-muted d-block mb-2">Your current total savings that you are comfortable investing (house or investments)</small>
                             <input type="number" class="form-control" id="initial_savings" value="{{ config.DEFAULT_INITIAL_SAVINGS }}" required>
                         </div>
                         <div class="form-group">
-                            <label for="house_cost">House Cost (€/$)</label>
+                            <label for="house_cost">House Cost (€)</label>
                             <small class="form-text text-muted d-block mb-2">Your share of the house price. This is the full house price excl. purchase costs if you are buying alone.</small>
                             <input type="number" class="form-control" id="house_cost" value="{{ config.DEFAULT_HOUSE_COST }}" required>
                         </div>
                         <div class="form-group">
-                            <label for="monthly_rent">Rent/Month (€/$)</label>
+                            <label for="monthly_rent">Rent/Month (€)</label>
                             <small class="form-text text-muted d-block mb-2">Your current monthly rent payment. </small>
                             <input type="number" class="form-control" id="monthly_rent" value="{{ config.DEFAULT_MONTHLY_RENT }}" required>
                         </div>
                         <div class="form-group">
-                            <label for="monthly_savings_capacity">Monthly Savings (€/$)</label>
+                            <label for="monthly_savings_capacity">Monthly Savings (€)</label>
                             <small class="form-text text-muted d-block mb-2">Remaining income after all expenses and rent, available for savings.</small>
                             <input type="number" class="form-control" id="monthly_savings_capacity" value="{{ config.DEFAULT_MONTHLY_SAVINGS_CAPACITY}}" required>
                         </div>
