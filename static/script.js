@@ -25,6 +25,15 @@ function loadFormDataFromCache() {
     }
 }
 
+// Update net worth label with time horizon
+function updateNetWorthLabel() {
+    const timeHorizon = document.getElementById('time_horizon_years').value;
+    const netWorthLabels = document.querySelectorAll('.net-worth-label');
+    netWorthLabels.forEach(label => {
+        label.textContent = `Net Worth after ${timeHorizon} years`;
+    });
+}
+
 // Add event listeners for input changes
 document.addEventListener('DOMContentLoaded', function() {
     // Load cached data when page loads
@@ -35,6 +44,12 @@ document.addEventListener('DOMContentLoaded', function() {
     inputs.forEach(input => {
         input.addEventListener('change', saveFormDataToCache);
     });
+
+    // Add specific listener for time horizon changes
+    document.getElementById('time_horizon_years').addEventListener('change', updateNetWorthLabel);
+    
+    // Initial update of net worth label
+    updateNetWorthLabel();
 });
 
 // Format currency values
@@ -300,6 +315,9 @@ function updateResults(results) {
     document.getElementById('resultsArea').style.display = 'block';
     document.getElementById('loadingSpinner').style.display = 'none';
     
+    // Update net worth label
+    updateNetWorthLabel();
+    
     // Update Net Worth Summary Table
     const netWorthTable = document.querySelector('.net-worth-summary .table tbody');
     netWorthTable.innerHTML = `
@@ -322,7 +340,7 @@ function updateResults(results) {
             <td class="text-end">${formatCurrency(results.min_mortgage.house_value)}</td>
         </tr>
         <tr class="table-primary">
-            <th><strong>Net Worth</strong></th>
+            <th><strong class="net-worth-label">Net Worth after ${document.getElementById('time_horizon_years').value} years</strong></th>
             <td class="text-end">${formatCurrency(results.rent.net_worth)}</td>
             <td class="text-end">${formatCurrency(results.max_mortgage.net_worth)}</td>
             <td class="text-end">${formatCurrency(results.min_mortgage.net_worth)}</td>

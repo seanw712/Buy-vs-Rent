@@ -15,7 +15,7 @@ DEFAULT_MONTHLY_RENT = 650  # €650 monthly rent
 DEFAULT_MONTHLY_SAVINGS_CAPACITY = 700  # €700 monthly savings capacity
 DEFAULT_TIME_HORIZON_YEARS = 30  # 30 years time horizon
 DEFAULT_MORTGAGE_TERM_YEARS = 25  # 25 years mortgage term
-DEFAULT_MIN_DOWN_PAYMENT_PERCENT = 0.15  # 15% minimum down payment
+DEFAULT_MIN_DOWN_PAYMENT_PERCENT = 0.10  # 15% minimum down payment
 
 # Mortgage Constants
 MIN_DOWN_PAYMENT_PERCENT = 0.10  # 10% minimum down payment
