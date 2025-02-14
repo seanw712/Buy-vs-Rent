@@ -1721,6 +1721,177 @@ OK, last thing. When I click the calculate button, it should automatically scrol
 
 _**Assistant**_
 
+I'll help you add automatic scrolling to the results section when the calculation is complete. We'll modify the JavaScript code to scroll to the results area after the data is displayed:
+
+---
+
+_**Assistant**_
+
+```
+function updateResults(results) {
+    // Check if initial savings can cover the minimum down payment
+    const formData = getFormData();
+    const totalHouseCost = formData.house_cost * (1 + formData.house_purchase_fees_percent);
+    const minDownPaymentRequired = totalHouseCost * formData.min_down_payment_percent;
+    
+    if (formData.initial_savings < minDownPaymentRequired) {
+        const shortfall = formatCurrency(minDownPaymentRequired - formData.initial_savings);
+        const message = `Error: Your initial savings are insufficient for the minimum down payment.
+
+Required down payment: ${formatCurrency(minDownPaymentRequired)}
+Your savings: ${formatCurrency(formData.initial_savings)}
+Shortfall: ${shortfall}
+
+To make this work, you could:
+• Increase your initial savings
+• Lower the house price
+• Find a mortgage with a lower down payment requirement`;
+
+        alert(message);
+        document.getElementById('loadingSpinner').style.display = 'none';
+        return;
+    }
+
+    // Check for negative monthly savings growth in mortgage scenarios
+    if (results.max_mortgage.monthly_investment_value < 0 || results.min_mortgage.monthly_investment_value < 0) {
+        const message = `Error: The mortgage payment would exceed your monthly savings capacity.
+
+To make this work, you could:
+• Lower the house price
+• Extend the mortgage term
+• Increase your down payment
+• Find a lower mortgage interest rate`;
+
+        alert(message);
+        document.getElementById('loadingSpinner').style.display = 'none';
+        return;
+    }
+
+    // Debug logging for net worth values
+    console.log('Rent scenario:', {
+        net_worth: results.rent.net_worth,
+        principal: results.rent.principal_investment_value,
+        monthly: results.rent.monthly_investment_value,
+        house: results.rent.house_value,
+        mortgage: results.rent.remaining_mortgage
+    });
+    console.log('Max mortgage scenario:', {
+        net_worth: results.max_mortgage.net_worth,
+        principal: results.max_mortgage.principal_investment_value,
+        monthly: results.max_mortgage.monthly_investment_value,
+        house: results.max_mortgage.house_value,
+        mortgage: results.max_mortgage.remaining_mortgage
+    });
+    console.log('Min mortgage scenario:', {
+        net_worth: results.min_mortgage.net_worth,
+        principal: results.min_mortgage.principal_investment_value,
+        monthly: results.min_mortgage.monthly_investment_value,
+        house: results.min_mortgage.house_value,
+        mortgage: results.min_mortgage.remaining_mortgage
+    });
+    
+    // Show results area and hide loading spinner
+    document.getElementById('resultsArea').style.display = 'block';
+    document.getElementById('loadingSpinner').style.display = 'none';
+    
+    // Update net worth label
+    updateNetWorthLabel();
+    
+    // Update Net Worth Summary Table
+    const netWorthTable = document.querySelector('.net-worth-summary .table tbody');
+    const timeHorizon = document.getElementById('time_horizon_years').value;
+    const cpi = parseFloat(document.getElementById('cpi').value) / 100;
+    
+    // Calculate inflation adjustment factor
+    const inflationFactor = 1 / Math.pow(1 + cpi, timeHorizon);
+    
+    netWorthTable.innerHTML = `
+        <tr>
+            <td><strong>Growth of Initial Savings</strong></td>
+            <td class="text-end">${formatCurrency(results.rent.principal_investment_value)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.principal_investment_value)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.principal_investment_value)}</td>
+        </tr>
+        <tr>
+            <td><strong>Growth of Monthly Savings</strong></td>
+            <td class="text-end">${formatCurrency(results.rent.monthly_investment_value)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.monthly_investment_value)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.monthly_investment_value)}</td>
+        </tr>
+        <tr>
+            <td><strong>House Value</strong></td>
+            <td class="text-end">-</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.house_value)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.house_value)}</td>
+        </tr>
+        <tr class="table-primary">
+            <th><strong class="net-worth-label">Net Worth after ${timeHorizon} years</strong></th>
+            <td class="text-end">${formatCurrency(results.rent.net_worth)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.net_worth)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.net_worth)}</td>
+        </tr>
+        <tr>
+            <td><strong>(Adjusted for Inflation)</strong></td>
+            <td class="text-end">${formatCurrency(results.rent.net_worth * inflationFactor)}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.net_worth * inflationFactor)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.net_worth * inflationFactor)}</td>
+        </tr>
+    `;
+    
+    // Update Additional Information Table
+    const additionalInfoTable = document.querySelector('.additional-info .table tbody');
+    additionalInfoTable.innerHTML = `
+        <tr>
+            <td><strong>Total Interest + Purchase Costs</strong></td>
+            <td class="text-end">-</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.total_purchase_costs)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.total_purchase_costs)}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Rent Costs</strong></td>
+            <td class="text-end">${formatCurrency(results.rent.total_rent_paid)}</td>
+            <td class="text-end">-</td>
+            <td class="text-end">-</td>
+        </tr>
+        <tr>
+            <td><strong>Monthly Housing Cost</strong></td>
+            <td class="text-end">${formatCurrency(results.rent.total_rent_paid / (getFormData().time_horizon_years * 12))}</td>
+            <td class="text-end">${formatCurrency(results.max_mortgage.monthly_mortgage_max)}</td>
+            <td class="text-end">${formatCurrency(results.min_mortgage.monthly_mortgage_min)}</td>
+        </tr>
+    `;
+    
+    // Update chart
+    updateChart(results);
+
+    // Scroll to results section
+    document.querySelector('.results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've added a line at the end of the `updateResults` function that will:
+1. Find the results section using `document.querySelector('.results-section')`
+2. Smoothly scroll it into view using `scrollIntoView()`
+3. The `{ behavior: 'smooth', block: 'start' }` options make the scrolling animated and ensure the section aligns with the top of the viewport
+
+Now when you click the calculate button and the results are displayed, the page will automatically scroll smoothly to show the results section at the top of the viewport. The smooth scrolling provides a better user experience than an instant jump to the section.
+
+---
+
+_**User**_
+
+I want to deploy this to google cloud run, it's asking me for a build ocntext directory, an entry point and a function target
+
+---
+
+_**Assistant**_
+
 
 
 ---
