@@ -2134,8 +2134,134 @@ Now, let's update the HTML to include the favicon:
 _**Assistant**_
 
 ```
-undefined
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy or Rent Calculator</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+// ... rest of the existing code ...
 ```
+
+---
+
+_**Assistant**_
+
+
+
+You'll need to add a favicon.ico file to your static directory. Here's how to do it:
+
+1. Download a house-themed favicon from a site like:
+   - https://favicon.io/
+   - https://www.favicon-generator.org/
+   - Or use a house emoji and convert it to favicon format
+
+2. Save the file as `favicon.ico` in your `static` folder
+
+3. The path should be: `static/favicon.ico`
+
+After adding the file and deploying the changes to Cloud Run, your browser tab should show the house icon.
+
+Would you like me to:
+1. Suggest some specific house-themed favicon designs?
+2. Provide instructions for creating a custom favicon from an image?
+3. Help you with the deployment of these changes to Cloud Run?
+
+---
+
+_**User**_
+
+will this automatically also update the google cloud deployment?
+
+---
+
+_**Assistant**_
+
+No, the changes won't automatically update in Google Cloud Run. You need to redeploy the application with the new changes. Here's how:
+
+1. After adding your favicon.ico file to the static folder and making the HTML changes, you need to redeploy using the same command as before:
+
+```powershell
+gcloud run deploy house-vs-stocks --source . --platform managed --region europe-west1 --allow-unauthenticated
+```
+
+This will:
+1. Upload your updated code (including the new favicon.ico)
+2. Build a new container version
+3. Deploy the new version to Cloud Run
+
+The deployment will maintain the same URL but update the content with your new changes. You might need to clear your browser cache or do a hard refresh (Ctrl + F5) to see the favicon change after deployment.
+
+Would you like me to help you with:
+1. The deployment command?
+2. Verifying the changes after deployment?
+3. Troubleshooting if the favicon doesn't appear?
+
+---
+
+_**User**_
+
+now, how can I assign a custom domain to this deployed google cloud run service
+
+---
+
+_**Assistant**_
+
+I'll guide you through the process of assigning a custom domain to your Cloud Run service:
+
+1. **First, verify your domain ownership in Google Cloud:**
+   - Go to the Google Cloud Console: https://console.cloud.google.com
+   - Search for "Domain Verification" in the search bar
+   - Click "Add domain"
+   - Enter your domain name
+   - Google will provide you with either:
+     - A TXT record to add to your DNS settings
+     - Or a HTML file to upload to your domain
+
+2. **Map the domain to your Cloud Run service:**
+   - Go to Cloud Run in the Google Cloud Console
+   - Click on your service (house-vs-stocks)
+   - Click on the "Domain Mappings" tab
+   - Click "Add Mapping"
+   - Enter your domain or subdomain (e.g., calculator.yourdomain.com)
+   - Click "Continue"
+
+3. **Update your DNS records:**
+   Google will provide you with records to add to your DNS settings. You'll typically need to add:
+   - An A record
+   - An AAAA record
+   - A CNAME record if you're using a subdomain
+
+The exact steps depend on where your domain is registered. For example:
+- If using GoDaddy:
+  1. Log in to GoDaddy
+  2. Go to your domain's DNS settings
+  3. Add the records Google provided
+
+- If using Namecheap:
+  1. Log in to Namecheap
+  2. Go to Domain List → Manage → Advanced DNS
+  3. Add the records Google provided
+
+Would you like me to:
+1. Help you with a specific domain registrar's settings?
+2. Guide you through setting up a subdomain instead of the main domain?
+3. Explain the different types of DNS records you might need to add?
+
+Please let me know:
+1. Which domain registrar you're using
+2. Whether you want to use your main domain or a subdomain
+3. If you've already verified your domain ownership in Google Cloud
+
+---
+
+_**User**_
+
+the favicon doesn't show properly
 
 ---
 
