@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buy or Rent Calculator</title>
+    <title>Rent vs Buy Calculator | Compare Renting and Buying a House</title>
+    <meta name="description" content="Free calculator to compare renting vs buying a house. See which option builds more wealth over time by analyzing rent, mortgage payments, and investment returns.">
+    <meta name="keywords" content="rent vs buy calculator, buy or rent calculator, house calculator, mortgage calculator, real estate investment, rent or buy comparison">
+    
+    <!-- Open Graph tags for social sharing -->
+    <meta property="og:title" content="Rent vs Buy Calculator | Compare Housing Options">
+    <meta property="og:description" content="Calculate whether renting or buying a house is better for your wealth. Compare scenarios with different down payments and investment strategies.">
+    <meta property="og:type" content="website">
+    
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -12,18 +20,45 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}?v=2">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Rent vs Buy Calculator",
+        "description": "Compare the financial outcomes of renting versus buying a home with this comprehensive calculator. Analyze different scenarios including investment returns, mortgage rates, and inflation.",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+        },
+        "featureList": [
+            "Compare renting vs buying scenarios",
+            "Investment return calculations",
+            "Inflation adjustment",
+            "Mortgage payment calculations",
+            "Long-term wealth comparison"
+        ]
+    }
+    </script>
 </head>
 <body>
     <div class="page-wrapper">
         <div class="container">
-            <h1 class="mb-4">Buy or Rent Calculator</h1>
+            <header>
+                <h1 class="mb-4">Rent vs Buy Calculator</h1>
+                <p class="lead mb-4">Compare the financial impact of renting versus buying a house. Calculate your potential wealth building through different housing strategies and see the effect of compounding returns and inflation.</p>
+            </header>
             
             <!-- Convert to accordion -->
             <div class="accordion mb-4" id="explainerAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#explainerContent">
-                            <strong>Explainer & Assumptions</strong> -> Click to Read
+                            <strong>How the Rent vs Buy Calculator Works</strong>
                         </button>
                     </h2>
                     <div id="explainerContent" class="accordion-collapse collapse" data-bs-parent="#explainerAccordion">
