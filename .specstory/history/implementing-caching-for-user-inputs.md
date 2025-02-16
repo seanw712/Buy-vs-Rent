@@ -2400,8 +2400,77 @@ Let's also add some structured data for better SEO:
 _**Assistant**_
 
 ```
-undefined
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Rent vs Buy Calculator",
+        "description": "Compare the financial outcomes of renting versus buying a home with this comprehensive calculator. Analyze different scenarios including investment returns, mortgage rates, and inflation.",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+        },
+        "featureList": [
+            "Compare renting vs buying scenarios",
+            "Investment return calculations",
+            "Inflation adjustment",
+            "Mortgage payment calculations",
+            "Long-term wealth comparison"
+        ]
+    }
+    </script>
+</head>
+// ... rest of the existing code ...
 ```
+
+---
+
+_**Assistant**_
+
+
+
+These changes include:
+
+1. **Title Tag Optimization**:
+   - Added a descriptive title that includes main keywords
+   - Kept it under 60 characters for optimal display in search results
+
+2. **Meta Description**:
+   - Added a compelling description that includes key features
+   - Optimized for click-through from search results
+
+3. **Meta Keywords**:
+   - Added relevant keywords (though these have less impact nowadays)
+
+4. **Open Graph Tags**:
+   - Added social sharing metadata for better visibility when shared
+
+5. **Structured Data**:
+   - Added JSON-LD markup for rich snippets in search results
+   - Describes the calculator as a web application with its features
+
+6. **Content Structure**:
+   - Added a descriptive lead paragraph
+   - Improved header hierarchy
+   - Made the explainer section title more descriptive
+
+7. **Semantic HTML**:
+   - Added proper `<header>` tags
+   - Improved heading structure
+
+These changes will help search engines better understand and rank your calculator while maintaining a clean, professional look for users.
+
+Would you like me to:
+1. Add more structured data types?
+2. Optimize any other specific sections?
+3. Add additional semantic HTML improvements?
 
 ---
 

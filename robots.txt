@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /static/
+
+# Disallow access to certain directories
+Disallow: /.git/
+Disallow: /.venv/
+Disallow: /.specstory/
+
+# Sitemap
+Sitemap: https://buyrentcalculator.app/sitemap.xml 
