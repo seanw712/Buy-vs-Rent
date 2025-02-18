@@ -313,6 +313,39 @@ h1 {
         border: 1px solid #6366f1;
     }
 
+    /* Add divider after inflation-adjusted card */
+    .mobile-cards .result-card:nth-child(2) {
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+    /* Add component breakdown label with line */
+    .mobile-cards .result-card:nth-child(2)::after {
+        content: 'Component Breakdown';
+        position: absolute;
+        bottom: -2.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 0 1rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+        z-index: 1;
+    }
+
+    /* Add the actual line */
+    .mobile-cards .result-card:nth-child(2)::before {
+        content: '';
+        position: absolute;
+        bottom: -2rem;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e5e7eb;
+        z-index: 0;
+    }
+
     .result-card-header {
         font-weight: 600;
         color: var(--text-primary);
