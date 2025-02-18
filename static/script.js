@@ -122,10 +122,10 @@ function updateChart(results) {
         maintainAspectRatio: false,
         layout: {
             padding: {
-                top: 20,
-                right: 20,
-                bottom: 20,
-                left: 20
+                top: window.innerWidth < 768 ? 5 : 10,
+                right: window.innerWidth < 768 ? 5 : 10,
+                bottom: window.innerWidth < 768 ? 25 : 10,
+                left: window.innerWidth < 768 ? 5 : 10
             }
         },
         scales: {
@@ -134,6 +134,10 @@ function updateChart(results) {
                 ticks: {
                     callback: function(value) {
                         return formatCurrency(value);
+                    },
+                    maxTicksLimit: window.innerWidth < 768 ? 6 : 8,
+                    font: {
+                        size: window.innerWidth < 768 ? 9 : 12
                     }
                 },
                 stacked: true
@@ -142,15 +146,24 @@ function updateChart(results) {
                 grid: {
                     display: false
                 },
-                stacked: true
+                stacked: true,
+                ticks: {
+                    font: {
+                        size: window.innerWidth < 768 ? 9 : 12
+                    }
+                }
             }
         },
         plugins: {
             legend: {
                 position: 'bottom',
+                align: 'start',
                 labels: {
-                    padding: 20,
-                    boxWidth: 15
+                    padding: window.innerWidth < 768 ? 8 : 20,
+                    boxWidth: window.innerWidth < 768 ? 8 : 15,
+                    font: {
+                        size: window.innerWidth < 768 ? 9 : 12
+                    }
                 }
             },
             tooltip: {
@@ -357,7 +370,7 @@ To make this work, you could:
     // Update net worth label
     updateNetWorthLabel();
     
-    // Update Net Worth Summary Table
+    // Update Net Worth Summary Table and Mobile Cards
     const netWorthTable = document.querySelector('.net-worth-summary .table tbody');
     const timeHorizon = document.getElementById('time_horizon_years').value;
     const cpi = parseFloat(document.getElementById('cpi').value) / 100;
@@ -365,6 +378,7 @@ To make this work, you could:
     // Calculate inflation adjustment factor
     const inflationFactor = 1 / Math.pow(1 + cpi, timeHorizon);
     
+    // Update desktop table
     netWorthTable.innerHTML = `
         <tr>
             <td><strong>Growth of Initial Savings</strong></td>
@@ -397,6 +411,44 @@ To make this work, you could:
             <td class="text-end">${formatCurrency(results.min_mortgage.net_worth * inflationFactor)}</td>
         </tr>
     `;
+
+    // Update mobile cards
+    const mobileCards = document.querySelector('.mobile-cards');
+    
+    // Update Net Worth card
+    const netWorthCard = mobileCards.querySelector('.result-card:nth-child(1)');
+    const netWorthValues = netWorthCard.querySelectorAll('.result-card-value');
+    netWorthValues[0].textContent = formatCurrency(results.rent.net_worth);
+    netWorthValues[1].textContent = formatCurrency(results.max_mortgage.net_worth);
+    netWorthValues[2].textContent = formatCurrency(results.min_mortgage.net_worth);
+
+    // Update Inflation Adjusted card
+    const inflationCard = mobileCards.querySelector('.result-card:nth-child(2)');
+    const inflationValues = inflationCard.querySelectorAll('.result-card-value');
+    inflationValues[0].textContent = formatCurrency(results.rent.net_worth * inflationFactor);
+    inflationValues[1].textContent = formatCurrency(results.max_mortgage.net_worth * inflationFactor);
+    inflationValues[2].textContent = formatCurrency(results.min_mortgage.net_worth * inflationFactor);
+
+    // Update Initial Savings Growth card
+    const initialSavingsCard = mobileCards.querySelector('.result-card:nth-child(3)');
+    const initialSavingsValues = initialSavingsCard.querySelectorAll('.result-card-value');
+    initialSavingsValues[0].textContent = formatCurrency(results.rent.principal_investment_value);
+    initialSavingsValues[1].textContent = formatCurrency(results.max_mortgage.principal_investment_value);
+    initialSavingsValues[2].textContent = formatCurrency(results.min_mortgage.principal_investment_value);
+
+    // Update Monthly Savings Growth card
+    const monthlySavingsCard = mobileCards.querySelector('.result-card:nth-child(4)');
+    const monthlySavingsValues = monthlySavingsCard.querySelectorAll('.result-card-value');
+    monthlySavingsValues[0].textContent = formatCurrency(results.rent.monthly_investment_value);
+    monthlySavingsValues[1].textContent = formatCurrency(results.max_mortgage.monthly_investment_value);
+    monthlySavingsValues[2].textContent = formatCurrency(results.min_mortgage.monthly_investment_value);
+
+    // Update House Value card
+    const houseValueCard = mobileCards.querySelector('.result-card:nth-child(5)');
+    const houseValueValues = houseValueCard.querySelectorAll('.result-card-value');
+    houseValueValues[0].textContent = '-';
+    houseValueValues[1].textContent = formatCurrency(results.max_mortgage.house_value);
+    houseValueValues[2].textContent = formatCurrency(results.min_mortgage.house_value);
     
     // Update Additional Information Table
     const additionalInfoTable = document.querySelector('.additional-info .table tbody');
