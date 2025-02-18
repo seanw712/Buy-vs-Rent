@@ -308,6 +308,38 @@ h1 {
         box-shadow: var(--shadow-sm);
     }
 
+    /* Mobile navigation button */
+    .mobile-nav-button {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .mobile-cards .mobile-nav-button {
+            display: block;
+            width: 80%;
+            margin: 2rem auto 1rem;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .mobile-cards .mobile-nav-button:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .mobile-cards .mobile-nav-button:active {
+            transform: translateY(0);
+        }
+    }
+
     .result-card.primary {
         background: #f3f4f6;
         border: 1px solid #d1d5db;

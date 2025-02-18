@@ -455,8 +455,239 @@ I'll add subtle background colors to these cards to match.
 _**Assistant**_
 
 ```
-undefined
+    .result-card.primary {
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+    }
+
+    /* Component cards styling */
+    .net-worth-summary .mobile-cards .result-card:nth-child(3) {
+        background: rgba(52, 152, 219, 0.1);
+        border: 1px solid rgba(52, 152, 219, 0.2);
+    }
+
+    .net-worth-summary .mobile-cards .result-card:nth-child(4) {
+        background: rgba(46, 204, 113, 0.1);
+        border: 1px solid rgba(46, 204, 113, 0.2);
+    }
+
+    .net-worth-summary .mobile-cards .result-card:nth-child(5) {
+        background: rgba(155, 89, 182, 0.1);
+        border: 1px solid rgba(155, 89, 182, 0.2);
+    }
+
+    /* Add divider after inflation-adjusted card */
+// ... existing code ...
 ```
+
+---
+
+_**Assistant**_
+
+
+
+I've added subtle background colors to match the graph:
+1. Growth of Initial Savings (3rd card): Light blue background
+2. Growth of Monthly Savings (4th card): Light green background
+3. House Value (5th card): Light purple background
+
+I used:
+- A very light background (0.1 opacity) to keep it subtle
+- Slightly darker borders (0.2 opacity) for definition
+- The exact same base colors as the graph for consistency
+
+This creates a visual connection between the cards and their corresponding bars in the graph while keeping the design clean and readable. Would you like me to adjust any of these colors?
+
+---
+
+_**User**_
+
+now, finally, in the mobile view only add a centered navigation button 'Change Parameters' below the card 'monthly housing cost'. Make the button similar to the calculate button but with transparent content and purple borders and text.
+
+---
+
+_**Assistant**_
+
+I'll add a "Change Parameters" button styled similarly to the calculate button but with a transparent background and purple accents. I'll add it only in the mobile view after the last card.
+
+---
+
+_**Assistant**_
+
+```
+    /* Mobile Cards */
+    .mobile-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 0;
+    }
+
+    .result-card {
+        width: 100%;
+        margin: 0;
+        padding: 1rem;
+        border-radius: 8px;
+        background: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Mobile navigation button */
+    .mobile-nav-button {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .mobile-nav-button {
+            display: block;
+            width: 80%;
+            margin: 2rem auto 1rem;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .mobile-nav-button:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .mobile-nav-button:active {
+            transform: translateY(0);
+        }
+    }
+
+    .result-card.primary {
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+Now I'll add the button to the HTML, placing it after the last card in the mobile view of the additional information section.
+
+---
+
+_**Assistant**_
+
+```
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Add mobile navigation button -->
+                            <button class="mobile-nav-button" onclick="document.querySelector('.input-section').scrollIntoView({behavior: 'smooth'})">
+                                Change Parameters
+                            </button>
+                            <!-- Keep existing table for desktop -->
+                            <div class="table-container">
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+I notice it added the button twice. Let me fix that by being more specific with the edit.
+
+---
+
+_**Assistant**_
+
+```
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Add mobile navigation button -->
+                            <button class="mobile-nav-button" onclick="document.querySelector('.input-section').scrollIntoView({behavior: 'smooth'})">
+                                Change Parameters
+                            </button>
+                            <!-- Keep existing table for desktop -->
+                            <div class="table-container">
+                                <table class="table">
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+Let me try one more time with a more specific edit.
+
+---
+
+_**Assistant**_
+
+```
+                                <!-- Monthly Housing Cost Card -->
+                                <div class="result-card">
+                                    <div class="result-card-header">
+                                        Monthly Housing Cost
+                                    </div>
+                                    <div class="result-card-content">
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Rent + Invest</div>
+                                            <div class="result-card-value"></div>
+                                        </div>
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Max. Mortgage</div>
+                                            <div class="result-card-value"></div>
+                                        </div>
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Min. Mortgage</div>
+                                            <div class="result-card-value"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Add mobile navigation button -->
+                                <button class="mobile-nav-button" onclick="document.querySelector('.input-section').scrollIntoView({behavior: 'smooth'})">
+                                    Change Parameters
+                                </button>
+                            </div>
+                            <!-- Keep existing table for desktop -->
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've added:
+1. A "Change Parameters" button that only appears in mobile view
+2. Styled it with:
+   - Transparent background
+   - Purple border (#6366f1)
+   - Purple text color
+   - 80% width centered
+   - Nice spacing (2rem top, 1rem bottom margin)
+   - Hover effect with slight background tint and lift
+   - Smooth scroll behavior when clicked
+3. The button will scroll the user back to the input section when clicked
+
+The button should now appear only in mobile view, centered below the last card, with a clean transparent design that matches the app's style. Would you like me to adjust any aspect of the button's appearance or behavior?
+
+---
+
+_**User**_
+
+it's visible on the desktop view, but looks great on mobile. Can you ensure it is only visible when the card view is turned on? E.g. on mobile.
 
 ---
 
