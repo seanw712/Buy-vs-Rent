@@ -50,7 +50,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial update of net worth label
     updateNetWorthLabel();
+
+    // Check if desktop view and trigger calculation
+    if (window.innerWidth > 768) {
+        // Small delay to ensure all values are properly loaded
+        setTimeout(() => {
+            document.getElementById('calculatorForm').dispatchEvent(new Event('submit'));
+        }, 100);
+    }
 });
+
+// Function to check if desktop view
+function isDesktopView() {
+    return window.innerWidth > 768;
+}
 
 // Format currency values
 function formatCurrency(value) {

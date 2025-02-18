@@ -693,6 +693,235 @@ it's visible on the desktop view, but looks great on mobile. Can you ensure it i
 
 _**Assistant**_
 
+I'll modify the CSS to ensure the "Change Parameters" button is only visible in mobile view when the card view is active. The issue is that we need to properly scope the display rules.
+
+---
+
+_**Assistant**_
+
+```
+    /* Mobile navigation button */
+    .mobile-nav-button {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .mobile-cards .mobile-nav-button {
+            display: block;
+            width: 80%;
+            margin: 2rem auto 1rem;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .mobile-cards .mobile-nav-button:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .mobile-cards .mobile-nav-button:active {
+            transform: translateY(0);
+        }
+    }
+
+    .result-card.primary {
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+Now I'll also update the HTML to ensure the button is properly placed inside the mobile cards container.
+
+---
+
+_**Assistant**_
+
+```
+                                    </div>
+                                </div>
+                                <!-- Add mobile navigation button -->
+                                <button class="mobile-nav-button" onclick="document.querySelector('.input-section').scrollIntoView({behavior: 'smooth'})">
+                                    Change Parameters
+                                </button>
+                            </div>
+                            <!-- Keep existing table for desktop -->
+                            <div class="table-container">
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+Let me try a more specific edit to remove the duplicate button.
+
+---
+
+_**Assistant**_
+
+```
+                            </div>
+                            <!-- Add mobile navigation button -->
+                            <button class="mobile-nav-button" onclick="document.querySelector('.input-section').scrollIntoView({behavior: 'smooth'})">
+                                Change Parameters
+                            </button>
+                            <!-- Keep existing table for desktop -->
+                            <div class="table-container">
+// ... existing code ...
+
+<!-- Replace this section -->
+                            <div class="mobile-cards">
+                                <!-- Total Interest + Purchase Costs Card -->
+                                <div class="result-card">
+                                    <div class="result-card-header">
+                                        Total Interest + Purchase Costs
+                                    </div>
+                                    <div class="result-card-content">
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Rent + Invest</div>
+                                            <div class="result-card-value">-</div>
+                                        </div>
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Max. Mortgage</div>
+                                            <div class="result-card-value"></div>
+                                        </div>
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Min. Mortgage</div>
+                                            <div class="result-card-value"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Total Rent Costs Card -->
+                                <div class="result-card">
+                                    <div class="result-card-header">
+                                        Total Rent Costs
+                                    </div>
+                                    <div class="result-card-content">
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Rent + Invest</div>
+                                            <div class="result-card-value"></div>
+                                        </div>
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Max. Mortgage</div>
+                                            <div class="result-card-value">-</div>
+                                        </div>
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Min. Mortgage</div>
+                                            <div class="result-card-value">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Monthly Housing Cost Card -->
+                                <div class="result-card">
+                                    <div class="result-card-header">
+                                        Monthly Housing Cost
+                                    </div>
+                                    <div class="result-card-content">
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Rent + Invest</div>
+                                            <div class="result-card-value"></div>
+                                        </div>
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Max. Mortgage</div>
+                                            <div class="result-card-value"></div>
+                                        </div>
+                                        <div class="result-card-item">
+                                            <div class="result-card-label">Min. Mortgage</div>
+                                            <div class="result-card-value"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Add mobile navigation button -->
+                                <button class="mobile-nav-button" onclick="document.querySelector('.input-section').scrollIntoView({behavior: 'smooth'})">
+                                    Change Parameters
+                                </button>
+                            </div>
+```
+
+---
+
+_**Assistant**_
+
+
+
+I apologize for the difficulty with the edit. Let me try one final approach to fix this.
+
+---
+
+_**Assistant**_
+
+```
+                                </div>
+                            </div>
+                            <!-- Keep existing table for desktop -->
+                            <div class="table-container">
+// ... existing code ...
+```
+
+---
+
+_**Assistant**_
+
+
+
+The changes have been made to:
+1. Remove the duplicate button from outside the mobile-cards container
+2. Keep the button only inside the mobile-cards container
+3. Update the CSS to ensure the button is only visible in mobile view when inside the mobile-cards container
+
+Now the "Change Parameters" button should:
+- Only be visible on mobile screens (width ≤ 768px)
+- Only appear when the mobile cards view is active
+- Be hidden on desktop view
+- Maintain its transparent background with purple border design
+
+Is there anything else you'd like me to adjust about the button's visibility or styling?
+
+---
+
+_**User**_
+
+In the desktop view, I now want the results section to be calculated standard when you open the page.
+
+---
+
+_**Assistant**_
+
+I'll help you modify the JavaScript to automatically calculate and display results when the page loads in desktop view. We'll need to trigger the form submission programmatically when the page loads, but only for desktop view.
+
+Let me explain what I'm going to do:
+1. Add a function to check if we're in desktop view (width > 768px)
+2. Create a function to trigger the calculation automatically
+3. Call this function when the page loads, but only for desktop view
+
+Let me make these changes:
+
+---
+
+_**Assistant**_
+
+```
+undefined
+```
+
+---
+
+_**Assistant**_
+
 
 
 ---
