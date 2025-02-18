@@ -2,13 +2,30 @@
 Web interface for the house vs stocks calculator.
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory, make_response
 from calculator import ScenarioInputs, compare_scenarios
 from dataclasses import asdict
 import config as cfg
 import math
+import os
+from datetime import datetime
 
 app = Flask(__name__)
+
+def generate_sitemap():
+    """Generate dynamic sitemap content."""
+    xml_content = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        '    <url>',
+        '        <loc>https://buyrentcalculator.app/</loc>',
+        f'        <lastmod>{datetime.now().strftime("%Y-%m-%d")}</lastmod>',
+        '        <changefreq>weekly</changefreq>',
+        '        <priority>1.0</priority>',
+        '    </url>',
+        '</urlset>'
+    ]
+    return '\n'.join(xml_content)
 
 @app.route('/')
 def index():
@@ -64,6 +81,18 @@ def calculate():
     except Exception as e:
         print(f"Calculation error: {str(e)}")
         return jsonify({'error': str(e)}), 400
+
+@app.route('/robots.txt')
+def serve_robots():
+    """Serve the robots.txt file."""
+    return send_from_directory(app.root_path, 'robots.txt')
+
+@app.route('/sitemap.xml')
+def serve_sitemap():
+    """Serve the sitemap.xml file."""
+    response = make_response(generate_sitemap())
+    response.headers['Content-Type'] = 'application/xml'
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True) 

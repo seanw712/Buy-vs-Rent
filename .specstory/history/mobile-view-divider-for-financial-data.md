@@ -915,6 +915,197 @@ Let me make these changes:
 _**Assistant**_
 
 ```
+// Add event listeners for input changes
+document.addEventListener('DOMContentLoaded', function() {
+    // Load cached data when page loads
+    loadFormDataFromCache();
+    
+    // Add change event listeners to all number inputs
+    const inputs = document.querySelectorAll('#calculatorForm input[type="number"]');
+    inputs.forEach(input => {
+        input.addEventListener('change', saveFormDataToCache);
+    });
+
+    // Add specific listener for time horizon changes
+    document.getElementById('time_horizon_years').addEventListener('change', updateNetWorthLabel);
+    
+    // Initial update of net worth label
+    updateNetWorthLabel();
+
+    // Check if desktop view and trigger calculation
+    if (window.innerWidth > 768) {
+        // Small delay to ensure all values are properly loaded
+        setTimeout(() => {
+            document.getElementById('calculatorForm').dispatchEvent(new Event('submit'));
+        }, 100);
+    }
+});
+
+// Function to check if desktop view
+function isDesktopView() {
+    return window.innerWidth > 768;
+}
+
+// Format currency values
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've made the following changes:
+1. Added a check for desktop view using `window.innerWidth > 768`
+2. Added a small delay (100ms) to ensure all form values are properly loaded before triggering the calculation
+3. Added a utility function `isDesktopView()` for future use if needed
+4. Used `dispatchEvent(new Event('submit'))` to programmatically trigger the form submission
+
+Now when you open the page in desktop view (screen width > 768px), the calculator will automatically:
+1. Load any cached form data
+2. Update the net worth label
+3. Trigger the calculation and display results
+
+The calculation won't auto-trigger on mobile view to avoid unnecessary calculations and data usage on mobile devices.
+
+Would you like me to make any adjustments to this implementation?
+
+---
+
+_**User**_
+
+Can you ensure that the robots.txt file is also being served to the frontend?
+
+---
+
+_**Assistant**_
+
+I'll help you serve the robots.txt file by adding a route in the Flask application. Let me modify the app.py file to serve the robots.txt file:
+
+---
+
+_**Assistant**_
+
+```
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"Calculation error: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/robots.txt')
+def serve_robots():
+    """Serve the robots.txt file."""
+    return app.send_file('robots.txt')
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've added a new route to serve the robots.txt file. However, I notice that we need to use `send_from_directory` instead of `send_file` for better file handling. Let me fix that:
+
+---
+
+_**Assistant**_
+
+```
+"""
+Web interface for the house vs stocks calculator.
+"""
+
+from flask import Flask, render_template, request, jsonify, send_from_directory
+from calculator import ScenarioInputs, compare_scenarios
+from dataclasses import asdict
+import config as cfg
+import math
+import os
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    """Serve the main calculator interface."""
+    return render_template('index.html', config=cfg)
+
+// ... existing code ...
+
+@app.route('/robots.txt')
+def serve_robots():
+    """Serve the robots.txt file."""
+    return send_from_directory(app.root_path, 'robots.txt')
+```
+
+---
+
+_**Assistant**_
+
+
+
+I've made the following changes to properly serve the robots.txt file:
+
+1. Added `send_from_directory` to the Flask imports
+2. Added `os` import for path handling
+3. Updated the `serve_robots()` function to use `send_from_directory` instead of `send_file`
+4. Used `app.root_path` to ensure the file is served from the correct directory
+
+Now the robots.txt file will be properly served when accessed at `/robots.txt`. This means:
+1. Search engines can properly access the robots.txt file
+2. The file will be served with the correct MIME type
+3. The directives in the robots.txt file will be respected by web crawlers
+
+You can verify this is working by:
+1. Visiting `http://your-domain/robots.txt` in your browser
+2. Using curl: `curl http://your-domain/robots.txt`
+
+Would you like me to make any additional changes to how the robots.txt file is being served?
+
+---
+
+_**User**_
+
+Can you now also ensure that the sitemap.xml exists, is filled correctly and served correctly for seo purposes?
+
+---
+
+_**Assistant**_
+
+I'll help you create and serve a sitemap.xml file. First, let's create the sitemap.xml file, then add a route to serve it.
+
+---
+
+_**Assistant**_
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://buyrentcalculator.app/</loc>
+        <lastmod>2024-03-21</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
+</urlset>
+```
+
+---
+
+_**Assistant**_
+
+
+
+Now, let's add a route to serve the sitemap.xml file and add some helper functions to dynamically generate the sitemap content:
+
+---
+
+_**Assistant**_
+
+```
 undefined
 ```
 
