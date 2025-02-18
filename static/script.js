@@ -472,6 +472,27 @@ To make this work, you could:
             <td class="text-end">${formatCurrency(results.min_mortgage.monthly_mortgage_min)}</td>
         </tr>
     `;
+
+    // Update Additional Information Mobile Cards
+    const additionalInfoCards = document.querySelector('.additional-info .mobile-cards');
+    
+    // Update Total Interest + Purchase Costs card
+    const purchaseCostsValues = additionalInfoCards.querySelector('.result-card:nth-child(1)').querySelectorAll('.result-card-value');
+    purchaseCostsValues[0].textContent = '-';
+    purchaseCostsValues[1].textContent = formatCurrency(results.max_mortgage.total_purchase_costs);
+    purchaseCostsValues[2].textContent = formatCurrency(results.min_mortgage.total_purchase_costs);
+
+    // Update Total Rent Costs card
+    const rentCostsValues = additionalInfoCards.querySelector('.result-card:nth-child(2)').querySelectorAll('.result-card-value');
+    rentCostsValues[0].textContent = formatCurrency(results.rent.total_rent_paid);
+    rentCostsValues[1].textContent = '-';
+    rentCostsValues[2].textContent = '-';
+
+    // Update Monthly Housing Cost card
+    const housingCostValues = additionalInfoCards.querySelector('.result-card:nth-child(3)').querySelectorAll('.result-card-value');
+    housingCostValues[0].textContent = formatCurrency(results.rent.total_rent_paid / (getFormData().time_horizon_years * 12));
+    housingCostValues[1].textContent = formatCurrency(results.max_mortgage.monthly_mortgage_max);
+    housingCostValues[2].textContent = formatCurrency(results.min_mortgage.monthly_mortgage_min);
     
     // Update chart
     updateChart(results);
