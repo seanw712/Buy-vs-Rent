@@ -14,17 +14,46 @@ app = Flask(__name__)
 
 def generate_sitemap():
     """Generate dynamic sitemap content."""
-    xml_content = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-        '    <url>',
-        '        <loc>https://buyrentcalculator.app/</loc>',
-        f'        <lastmod>{datetime.now().strftime("%Y-%m-%d")}</lastmod>',
-        '        <changefreq>weekly</changefreq>',
-        '        <priority>1.0</priority>',
-        '    </url>',
-        '</urlset>'
+    base_url = "https://buyrentcalculator.app"
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    
+    # Define all URLs with their properties
+    urls = [
+        {
+            'loc': f"{base_url}/",
+            'lastmod': current_date,
+            'changefreq': 'daily',
+            'priority': '1.0'
+        },
+        {
+            'loc': f"{base_url}/terms",
+            'lastmod': current_date,
+            'changefreq': 'monthly',
+            'priority': '0.8'
+        },
+        {
+            'loc': f"{base_url}/privacy",
+            'lastmod': current_date,
+            'changefreq': 'monthly',
+            'priority': '0.8'
+        }
     ]
+    
+    # Generate XML content
+    xml_content = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml_content.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    
+    for url in urls:
+        xml_content.extend([
+            '    <url>',
+            f'        <loc>{url["loc"]}</loc>',
+            f'        <lastmod>{url["lastmod"]}</lastmod>',
+            f'        <changefreq>{url["changefreq"]}</changefreq>',
+            f'        <priority>{url["priority"]}</priority>',
+            '    </url>'
+        ])
+    
+    xml_content.append('</urlset>')
     return '\n'.join(xml_content)
 
 @app.route('/')

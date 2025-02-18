@@ -168,6 +168,31 @@ h1 {
     width: 25%;
 }
 
+/* Add color styling for table row labels */
+.net-worth-summary .table tr:nth-child(1) {
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.net-worth-summary .table tr:nth-child(1) td:first-child strong {
+    color: rgb(52, 152, 219);
+}
+
+.net-worth-summary .table tr:nth-child(2) {
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.net-worth-summary .table tr:nth-child(2) td:first-child strong {
+    color: rgb(46, 204, 113);
+}
+
+.net-worth-summary .table tr:nth-child(3) {
+    background: rgba(155, 89, 182, 0.1);
+}
+
+.net-worth-summary .table tr:nth-child(3) td:first-child strong {
+    color: rgb(155, 89, 182);
+}
+
 .table th:not(:first-child),
 .table td:not(:first-child) {
     width: 25%;
@@ -180,13 +205,30 @@ h1 {
 }
 
 .table-primary {
-    background-color: #f5f3ff !important;
+    background-color: #f3f4f6 !important;
+    border: 1px solid #d1d5db;
 }
 
 .table-primary th,
 .table-primary td {
     font-weight: 600;
-    color: #6366f1;
+    color: var(--text-primary);
+    border-color: #d1d5db;
+}
+
+/* Add specific styling for the Net Worth row header */
+.table-primary th strong.net-worth-label {
+    color: var(--text-primary);
+}
+
+/* Remove the additional info table colors */
+.additional-info .table tr:nth-child(1) td:first-child strong,
+.additional-info .table tr:nth-child(2) td:first-child strong,
+.additional-info .table tr:nth-child(3) td:first-child strong {
+    color: inherit;
+    background: none;
+    padding: 0;
+    border-radius: 0;
 }
 
 /* Form Controls */
@@ -380,6 +422,7 @@ h1 {
         z-index: 1;
         background: transparent;
         padding: 0.5rem 0;
+        white-space: nowrap;
     }
 
     /* Add the actual line */
